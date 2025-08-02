@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"PT Sans"', 'sans-serif'],
-        headline: ['"PT Sans"', 'sans-serif'],
+        body: ['"Exo 2"', 'sans-serif'],
+        headline: ['"Orbitron"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -96,6 +96,10 @@ export default {
         flash: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
+        },
+        glow: {
+          '0%, 100%': { filter: 'drop-shadow(0 0 2px currentColor)' },
+          '50%': { filter: 'drop-shadow(0 0 5px currentColor)' },
         }
       },
       animation: {
@@ -103,6 +107,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'shake': 'shake 0.3s ease-in-out',
         'flash': 'flash 0.2s ease-in-out',
+        'glow': 'glow 1.5s ease-in-out infinite',
       },
     },
   },

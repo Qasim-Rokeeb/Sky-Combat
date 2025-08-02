@@ -25,7 +25,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
   isPlayerTurn,
 }) => {
   return (
-    <div className="aspect-square w-full max-w-[calc(100vh-4rem)] bg-card rounded-lg p-2 shadow-inner">
+    <div className="aspect-square w-full max-w-[calc(100vh-4rem)] bg-card/50 rounded-lg p-2 shadow-inner border border-primary/20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
       <div
         className="grid h-full w-full"
         style={{
@@ -43,7 +43,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
               <div
                 key={`${x}-${y}`}
                 className={cn(
-                  "border border-border/20 flex items-center justify-center transition-colors duration-300",
+                  "border border-primary/10 flex items-center justify-center transition-colors duration-300",
                   (isPlayerTurn || (cell && cell.owner === 'player')) && "cursor-pointer",
                   !isPlayerTurn && "cursor-not-allowed",
                   isHighlighted ? "bg-primary/30" : "hover:bg-accent/10"

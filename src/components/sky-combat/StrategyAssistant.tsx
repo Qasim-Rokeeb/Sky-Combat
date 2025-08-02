@@ -62,9 +62,9 @@ const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
   };
 
   return (
-    <Card className="flex-grow flex flex-col">
+    <Card className="flex-grow flex flex-col bg-secondary/50 border-primary/20">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-lg font-headline">
           <Lightbulb className="text-accent" />
           Strategy Assistant
         </CardTitle>
@@ -73,18 +73,19 @@ const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
         <div className="text-sm text-muted-foreground min-h-[6rem]">
             {isLoading && (
                 <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full bg-primary/20" />
+                    <Skeleton className="h-4 w-full bg-primary/20" />
+                    <Skeleton className="h-4 w-3/4 bg-primary/20" />
                 </div>
             )}
             {suggestion && <p>{suggestion}</p>}
-            {!isLoading && !suggestion && <p>Click the button below for a strategic tip from our AI assistant.</p>}
+            {!isLoading && !suggestion && <p>Click for a strategic tip from our AI assistant.</p>}
         </div>
         <Button
           onClick={handleGetSuggestion}
           disabled={isLoading || gameState.currentPlayer !== 'player'}
           className="w-full mt-4"
+          variant="outline"
         >
           {isLoading ? "Analyzing..." : "Get AI Suggestion"}
         </Button>

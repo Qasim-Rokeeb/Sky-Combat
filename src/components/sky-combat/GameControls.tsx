@@ -17,9 +17,9 @@ interface GameControlsProps {
 }
 
 const SelectedAircraftInfo: React.FC<{ aircraft: Aircraft }> = ({ aircraft }) => (
-  <Card>
+  <Card className="bg-secondary/50 border-primary/20">
     <CardHeader className="p-4">
-      <CardTitle className="text-lg capitalize flex items-center gap-2">
+      <CardTitle className="text-lg capitalize flex items-center gap-2 font-headline">
         {aircraft.type}
         <span className="text-sm font-normal text-muted-foreground">({aircraft.owner})</span>
       </CardTitle>
@@ -54,12 +54,12 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <h1 className="text-2xl font-bold text-center font-headline">Sky Combat</h1>
+      <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary animate-glow">Sky Combat</h1>
 
-      <Card>
+      <Card className="bg-secondary/50 border-primary/20">
         <CardContent className="p-4 text-center">
-            <p className="text-lg font-semibold">
-                Turn: <span className={isPlayerTurn ? 'text-blue-400' : 'text-red-400'}>{gameState.currentPlayer.toUpperCase()}</span>
+            <p className="text-lg font-semibold font-headline">
+                Turn: <span className={isPlayerTurn ? 'text-primary' : 'text-destructive'}>{gameState.currentPlayer.toUpperCase()}</span>
             </p>
         </CardContent>
       </Card>
@@ -67,7 +67,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       {selectedAircraft && <SelectedAircraftInfo aircraft={selectedAircraft} />}
 
       <div className="space-y-2">
-        <h3 className="font-semibold text-center">Actions</h3>
+        <h3 className="font-semibold text-center font-headline">Actions</h3>
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={() => onActionSelect("move")}
@@ -86,7 +86,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         </div>
       </div>
       
-      <Button onClick={onEndTurn} disabled={!isPlayerTurn} className="w-full">
+      <Button onClick={onEndTurn} disabled={!isPlayerTurn} className="w-full font-bold">
         End Turn
       </Button>
       
