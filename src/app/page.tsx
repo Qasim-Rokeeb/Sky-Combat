@@ -7,7 +7,7 @@ import { Gamepad2, Rocket, Zap } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background to-primary/20 text-foreground">
       <header className="container mx-auto px-4 py-6 flex items-center gap-4">
         <Rocket className="w-10 h-10 text-primary" />
         <h1 className="text-4xl font-bold font-headline tracking-widest text-primary animate-glow">

@@ -244,7 +244,7 @@ export default function SkyCombatPage() {
   }, [state.animation]);
 
   return (
-    <main className="flex h-screen w-screen flex-col lg:flex-row bg-background text-foreground p-4 gap-4 overflow-hidden">
+    <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-br from-background via-background to-primary/20 text-foreground p-4 gap-4 overflow-hidden">
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
           grid={state.grid}
