@@ -116,7 +116,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="container mx-auto px-4 py-6 text-center text-muted-foreground">
-        <p>&copy; 2024 Sky Combat. All rights reserved.</p>
+        <p>&copy; 2025 Sky Combat. All rights reserved.</p>
       </footer>
     </div>
   );
