@@ -1,272 +1,122 @@
-"use client";
 
-import React, { useCallback, useEffect, useReducer, useState } from "react";
-import {
-  Bomb,
-  Crosshair,
-  Move,
-  Shield,
-  Send,
-  ShieldCheck,
-  RotateCcw,
-} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Gamepad2, Rocket, Zap } from "lucide-react";
 
-import type {
-  GameState,
-  Player,
-  ActionType,
-  Aircraft,
-  Grid,
-} from "@/types/game";
-import { createInitialState, opponentAI } from "@/lib/game-utils";
-import Battlefield from "@/components/sky-combat/Battlefield";
-import GameControls from "@/components/sky-combat/GameControls";
-import GameOverDialog from "@/components/sky-combat/GameOverDialog";
-import { useToast } from "@/hooks/use-toast";
-
-type GameAction =
-  | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
-  | { type: "SELECT_ACTION"; payload: { action: ActionType } }
-  | { type: "MOVE_AIRCRAFT"; payload: { x: number; y: number } }
-  | { type: "ATTACK_AIRCRAFT"; payload: { targetId: string } }
-  | { type: "END_TURN" }
-  | { type: "START_OPPONENT_TURN" }
-  | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
-  | { type: "RESET_GAME" }
-  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string } }
-  | { type: "CLEAR_ANIMATION" };
-
-const GRID_WIDTH = 12;
-const GRID_HEIGHT = 12;
-
-const gameReducer = (state: GameState, action: GameAction): GameState => {
-  switch (action.type) {
-    case "SELECT_AIRCRAFT": {
-      const { aircraftId } = action.payload;
-      const aircraft = state.aircrafts[aircraftId];
-      if (aircraft.owner !== state.currentPlayer || state.phase === 'gameOver') return state;
-
-      return {
-        ...state,
-        selectedAircraftId: aircraftId,
-        selectedAction: "none",
-        actionHighlights: [],
-        attackableAircraftIds: [],
-      };
-    }
-
-    case "SELECT_ACTION": {
-      if (!state.selectedAircraftId) return state;
-      const { action } = action.payload;
-      const aircraft = state.aircrafts[state.selectedAircraftId];
-
-      if (action === "move" && !aircraft.hasMoved) {
-        const highlights = [];
-        for (let i = -aircraft.stats.speed; i <= aircraft.stats.speed; i++) {
-          for (let j = -aircraft.stats.speed; j <= aircraft.stats.speed; j++) {
-            if (Math.abs(i) + Math.abs(j) <= aircraft.stats.speed) {
-              const newX = aircraft.position.x + i;
-              const newY = aircraft.position.y + j;
-              if (newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT && !state.grid[newY][newX]) {
-                highlights.push({ x: newX, y: newY });
-              }
-            }
-          }
-        }
-        return { ...state, selectedAction: "move", actionHighlights: highlights, attackableAircraftIds: [] };
-      }
-
-      if (action === "attack" && !aircraft.hasAttacked) {
-        const attackable = Object.values(state.aircrafts).filter(target => {
-          if (target.owner === state.currentPlayer) return false;
-          const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
-          return distance <= aircraft.stats.range;
-        }).map(a => a.id);
-        return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable };
-      }
-      return state;
-    }
-
-    case "MOVE_AIRCRAFT": {
-      if (!state.selectedAircraftId || state.selectedAction !== "move") return state;
-      const { x, y } = action.payload;
-      const aircraft = state.aircrafts[state.selectedAircraftId];
-
-      const newGrid: Grid = state.grid.map(row => [...row]);
-      newGrid[aircraft.position.y][aircraft.position.x] = null;
-      newGrid[y][x] = aircraft;
-
-      const updatedAircraft = { ...aircraft, position: { x, y }, hasMoved: true };
-      
-      return {
-        ...state,
-        grid: newGrid,
-        aircrafts: { ...state.aircrafts, [state.selectedAircraftId]: updatedAircraft },
-        selectedAction: "none",
-        actionHighlights: [],
-      };
-    }
-
-    case "ATTACK_AIRCRAFT": {
-      if (!state.selectedAircraftId || state.selectedAction !== "attack") return state;
-      const { targetId } = action.payload;
-      const attacker = state.aircrafts[state.selectedAircraftId];
-      const defender = state.aircrafts[targetId];
-
-      const damage = Math.max(1, attacker.stats.attack - defender.stats.defense);
-      const newHp = defender.stats.hp - damage;
-
-      const updatedAircrafts = { ...state.aircrafts };
-      updatedAircrafts[attacker.id] = { ...attacker, hasAttacked: true };
-
-      let newGrid = state.grid.map(row => [...row]);
-      if (newHp <= 0) {
-        delete updatedAircrafts[targetId];
-        newGrid[defender.position.y][defender.position.x] = null;
-      } else {
-        updatedAircrafts[targetId] = { ...defender, stats: { ...defender.stats, hp: newHp } };
-      }
-
-      return {
-        ...state,
-        aircrafts: updatedAircrafts,
-        grid: newGrid,
-        selectedAction: "none",
-        attackableAircraftIds: [],
-        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id },
-      };
-    }
-    
-    case "END_TURN": {
-        const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
-        const updatedAircrafts = { ...state.aircrafts };
-        Object.values(state.aircrafts).forEach(a => {
-            if (a.owner === nextPlayer) {
-                updatedAircrafts[a.id] = { ...a, hasMoved: false, hasAttacked: false };
-            }
-        });
-
-        return {
-            ...state,
-            currentPlayer: nextPlayer,
-            selectedAircraftId: null,
-            selectedAction: 'none',
-            actionHighlights: [],
-            attackableAircraftIds: [],
-            aircrafts: updatedAircrafts,
-        };
-    }
-
-    case "SET_GAME_OVER":
-        return { ...state, phase: 'gameOver', winner: action.payload.winner };
-
-    case "RESET_GAME":
-        return createInitialState(GRID_WIDTH, GRID_HEIGHT);
-    
-    case "SHOW_ANIMATION":
-        return {...state, animation: {type: 'attack', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId}};
-
-    case "CLEAR_ANIMATION":
-        return {...state, animation: null};
-
-    default:
-      return state;
-  }
-};
-
-export default function SkyCombatPage() {
-  const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT));
-  const { toast } = useToast();
-
-  const handleCellClick = (x: number, y: number, aircraft: Aircraft | null) => {
-    if (state.phase === 'gameOver') return;
-
-    if (aircraft && aircraft.owner === state.currentPlayer) {
-      dispatch({ type: "SELECT_AIRCRAFT", payload: { aircraftId: aircraft.id } });
-    } else if (state.selectedAircraftId && state.selectedAction === "move" && !aircraft) {
-      if (state.actionHighlights.some(p => p.x === x && p.y === y)) {
-        dispatch({ type: "MOVE_AIRCRAFT", payload: { x, y } });
-      }
-    } else if (state.selectedAircraftId && state.selectedAction === "attack" && aircraft && aircraft.owner !== state.currentPlayer) {
-        if (state.attackableAircraftIds.includes(aircraft.id)) {
-            dispatch({ type: "ATTACK_AIRCRAFT", payload: { targetId: aircraft.id } });
-        }
-    }
-  };
-
-  const handleActionSelect = (action: ActionType) => {
-    dispatch({ type: "SELECT_ACTION", payload: { action } });
-  };
-  
-  const handleEndTurn = () => {
-    dispatch({ type: "END_TURN" });
-  };
-  
-  const handleResetGame = () => {
-      dispatch({type: 'RESET_GAME'});
-  }
-
-  // Game Over Check
-  useEffect(() => {
-    const playerAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'player');
-    const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
-    if (playerAircraft.length === 0) {
-      dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
-    } else if (opponentAircraft.length === 0) {
-      dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
-    }
-  }, [state.aircrafts]);
-
-  // Opponent Turn Logic
-  useEffect(() => {
-    if (state.currentPlayer === 'opponent' && state.phase === 'playing') {
-      const opponentTurn = async () => {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          toast({ title: "Opponent's Turn", description: "The opponent is making its move." });
-          await opponentAI(state, dispatch);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          dispatch({ type: 'END_TURN' });
-          toast({ title: "Your Turn", description: "It's now your turn to act." });
-      };
-      opponentTurn();
-    }
-  }, [state.currentPlayer, state.phase, toast]);
-
-  // Animation Cleanup
-  useEffect(() => {
-    if (state.animation) {
-        const timer = setTimeout(() => {
-            dispatch({ type: 'CLEAR_ANIMATION' });
-        }, 500);
-        return () => clearTimeout(timer);
-    }
-  }, [state.animation]);
-
+export default function LandingPage() {
   return (
-    <main className="flex h-screen w-screen flex-col lg:flex-row bg-background text-foreground p-4 gap-4 overflow-hidden">
-      <div className="flex-grow flex items-center justify-center">
-        <Battlefield
-          grid={state.grid}
-          onCellClick={handleCellClick}
-          selectedAircraftId={state.selectedAircraftId}
-          actionHighlights={state.actionHighlights}
-          attackableAircraftIds={state.attackableAircraftIds}
-          animation={state.animation}
-          isPlayerTurn={state.currentPlayer === 'player'}
-        />
-      </div>
-      <aside className="w-full lg:w-96 bg-card text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
-        <GameControls
-          gameState={state}
-          onActionSelect={handleActionSelect}
-          onEndTurn={handleEndTurn}
-        />
-      </aside>
-      <GameOverDialog 
-        isOpen={state.phase === 'gameOver'} 
-        winner={state.winner}
-        onReset={handleResetGame}
-      />
-    </main>
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <header className="container mx-auto px-4 py-6">
+        <h1 className="text-4xl font-bold font-headline tracking-widest text-primary animate-glow">
+          Sky Combat
+        </h1>
+      </header>
+
+      <main className="flex-grow">
+        <section className="relative h-[60vh] flex items-center justify-center text-center px-4 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
+          <div className="z-10">
+            <h2 className="text-5xl md:text-7xl font-bold font-headline mb-4">
+              Dominate the Skies
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              Engage in thrilling turn-based aerial warfare. Command your fleet,
+              outsmart your opponents, and become the master of the skies in
+              this strategic grid-based combat game.
+            </p>
+            <Link href="/game">
+              <Button size="lg" className="font-bold text-lg">
+                <Gamepad2 className="mr-2" />
+                Play Now
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 py-16 sm:py-24">
+          <div className="text-center mb-12">
+            <h3 className="text-4xl font-bold font-headline">Core Features</h3>
+            <p className="text-muted-foreground mt-2">
+              Everything you need for strategic aerial combat.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="bg-card/50">
+              <CardHeader className="items-center text-center">
+                <div className="p-4 bg-primary/10 rounded-full mb-4">
+                  <Rocket className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="font-headline">
+                  Strategic Gameplay
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center text-muted-foreground">
+                Plan your moves, anticipate your enemy, and utilize unique
+                aircraft abilities to gain the upper hand on a grid-based
+                battlefield.
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50">
+              <CardHeader className="items-center text-center">
+                <div className="p-4 bg-primary/10 rounded-full mb-4">
+                  <Zap className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="font-headline">
+                  Multiple Aircrafts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center text-muted-foreground">
+                Command a diverse fleet of fighters, bombers, and support
+                aircraft, each with distinct stats and powerful special
+                abilities.
+              </CardContent>
+            </Card>
+            <Card className="bg-card/50">
+              <CardHeader className="items-center text-center">
+                <div className="p-4 bg-primary/10 rounded-full mb-4">
+                  <Gamepad2 className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="font-headline">AI Opponent</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center text-muted-foreground">
+                Test your tactical skills against a challenging AI opponent. Plus,
+                get strategic suggestions from an integrated AI assistant.
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 py-16 sm:py-24">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 className="text-4xl font-bold font-headline mb-4">Visualize the Battlefield</h3>
+                    <p className="text-muted-foreground text-lg mb-6">
+                        An intuitive and responsive UI brings the battlefield to life. Track your aircrafts, monitor their health, and execute your strategy with ease.
+                    </p>
+                    <Link href="/game">
+                        <Button variant="outline">
+                            Start Your Conquest
+                        </Button>
+                    </Link>
+                </div>
+                <div>
+                    <Image 
+                        src="https://placehold.co/600x400.png"
+                        alt="Gameplay Screenshot"
+                        width={600}
+                        height={400}
+                        className="rounded-lg shadow-2xl"
+                        data-ai-hint="gameplay screenshot"
+                    />
+                </div>
+            </div>
+        </section>
+      </main>
+
+      <footer className="container mx-auto px-4 py-6 text-center text-muted-foreground">
+        <p>&copy; 2024 Sky Combat. All rights reserved.</p>
+      </footer>
+    </div>
   );
 }

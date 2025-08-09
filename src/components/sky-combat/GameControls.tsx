@@ -1,7 +1,8 @@
+
 "use client";
 
 import React from "react";
-import { Crosshair, Move, ShieldCheck, RotateCcw } from "lucide-react";
+import { Crosshair, Move, Home } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import StrategyAssistant from "./StrategyAssistant";
 import { Progress } from "../ui/progress";
+import Link from "next/link";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -54,7 +56,15 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary animate-glow">Sky Combat</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary animate-glow">Sky Combat</h1>
+        <Link href="/">
+            <Button variant="outline" size="icon">
+                <Home />
+            </Button>
+        </Link>
+      </div>
+
 
       <Card className="bg-secondary/50 border-primary/20">
         <CardContent className="p-4 text-center">
