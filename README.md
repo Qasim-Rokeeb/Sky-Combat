@@ -3,7 +3,7 @@
 
 Sky Combat is a web-based strategy game where players engage in turn-based aerial battles. The game features a grid-based battlefield where players strategically maneuver aircraft, engage in combat, and utilize special abilities to outsmart their opponents. The core gameplay revolves around tactical positioning, anticipating enemy moves, and making calculated decisions to achieve victory.
 
-To get started, take a look at src/app/page.tsx.
+
 
 # Core Features
 
