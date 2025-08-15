@@ -7,14 +7,9 @@ To get started, take a look at src/app/page.tsx.
 
 # Core Features
 
-*   **Turn-Based Gameplay:** Players take turns moving aircraft and performing actions.
-*   **Grid-Based Battlefield:** The game is played on a grid, influencing movement and attack ranges.
-*   **Multiple Aircraft Types:** Different aircraft with unique stats and abilities.
-*   **Strategic Movement:** Players plan their moves to gain positional advantages.
-*   **Combat System:** Engaging combat mechanics based on aircraft stats and abilities.
-*   **Special Abilities:** Aircraft can have special abilities that influence gameplay.
-*   **AI Opponent:** A challenging AI opponent using the strategy-ai-assistant flow to provide strategic suggestions.
-*   **User Interface:** An intuitive and responsive UI for gameplay and interaction.
+*   **Strategic Gameplay:** Plan your moves, anticipate your enemy, and utilize unique aircraft abilities to gain the upper hand on a grid-based battlefield.
+*   **Multiple Aircrafts:** Command a diverse fleet of fighters, bombers, and support aircraft, each with distinct stats and powerful special abilities.
+*   **AI Opponent:** Test your tactical skills against a challenging AI opponent. Plus, get strategic suggestions from an integrated AI assistant.
 
 # Style Guidelines
 
@@ -24,3 +19,4 @@ To get started, take a look at src/app/page.tsx.
 *   **Typography:** Select readable fonts for in-game text.
 *   **Responsiveness:** The UI should be responsive and work well on different screen sizes.
 *   **Animations:** Use subtle animations to enhance the user experience.
+
