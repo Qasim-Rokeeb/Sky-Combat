@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import StrategyAssistant from "./StrategyAssistant";
 import { Progress } from "../ui/progress";
 import Link from "next/link";
+import { ThemeToggle } from "../theme-toggle";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -34,11 +35,14 @@ const GameControls: React.FC<GameControlsProps> = ({
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary-foreground animate-glow">Sky Combat</h1>
-        <Link href="/">
-            <Button variant="outline" size="icon">
-                <Home />
-            </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/">
+                <Button variant="outline" size="icon">
+                    <Home />
+                </Button>
+            </Link>
+        </div>
       </div>
 
 
