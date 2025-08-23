@@ -36,20 +36,6 @@ export const createInitialState = (width: number, height: number): GameState => 
   const createAircraft = (id: string, type: "fighter" | "bomber" | "support", owner: 'player' | 'opponent', seed: number) => {
     const position = getRandomPosition(owner, seed);
     const baseStats = AIRCRAFT_STATS[type];
-
-    // Introduce stat variations. Values can be +/- 10% of the base.
-    const statVariation = (base: number, seed: number) => {
-        const variation = (pseudoRandom(seed) - 0.5) * 0.2; // -0.1 to +0.1
-        return Math.round(base * (1 + variation));
-    };
-    
-    let randomSeed = seed;
-    const variedStats = {
-        ...baseStats,
-        maxHp: statVariation(baseStats.maxHp, randomSeed++),
-        attack: statVariation(baseStats.attack, randomSeed++),
-        defense: statVariation(baseStats.defense, randomSeed++),
-    };
     
     const aircraft: Aircraft = {
       id,
@@ -57,11 +43,11 @@ export const createInitialState = (width: number, height: number): GameState => 
       position,
       owner,
       stats: { 
-        ...variedStats,
-        hp: variedStats.maxHp, // Start with full health
+        ...baseStats,
+        hp: baseStats.maxHp, // Start with full health
         xp: 0,
         level: 1,
-        energy: variedStats.maxEnergy,
+        energy: baseStats.maxEnergy,
       },
       hasMoved: false,
       hasAttacked: false,
