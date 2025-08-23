@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,16 @@ interface GameControlsProps {
   gameState: GameState;
   onActionSelect: (action: ActionType) => void;
   onEndTurn: () => void;
+  isMusicPlaying: boolean;
+  onToggleMusic: () => void;
 }
 
 const GameControls: React.FC<GameControlsProps> = ({
   gameState,
   onActionSelect,
   onEndTurn,
+  isMusicPlaying,
+  onToggleMusic,
 }) => {
   const selectedAircraft = gameState.selectedAircraftId
     ? gameState.aircrafts[gameState.selectedAircraftId]
@@ -36,6 +40,9 @@ const GameControls: React.FC<GameControlsProps> = ({
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary-foreground animate-glow">Sky Combat</h1>
         <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={onToggleMusic}>
+              {isMusicPlaying ? <VolumeX /> : <Music />}
+            </Button>
             <ThemeToggle />
             <Link href="/">
                 <Button variant="outline" size="icon">

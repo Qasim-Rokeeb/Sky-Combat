@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useCallback, useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
   Bomb,
   Crosshair,
@@ -186,6 +186,19 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 export default function SkyCombatPage() {
   const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT));
   const { toast } = useToast();
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+        if (isMusicPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsMusicPlaying(!isMusicPlaying);
+    }
+  };
 
   const handleCellClick = (x: number, y: number, aircraft: Aircraft | null) => {
     if (state.phase === 'gameOver') return;
@@ -261,6 +274,10 @@ export default function SkyCombatPage() {
 
   return (
     <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+      <audio ref={audioRef} loop>
+        {/* You can replace this with your own music file */}
+        <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Road-To-The-Unknown.mp3" type="audio/mpeg" />
+      </audio>
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <PlayerStats aircraft={selectedAircraft} />
         <MiniMap gameState={state} />
@@ -281,6 +298,8 @@ export default function SkyCombatPage() {
           gameState={state}
           onActionSelect={handleActionSelect}
           onEndTurn={handleEndTurn}
+          isMusicPlaying={isMusicPlaying}
+          onToggleMusic={toggleMusic}
         />
       </aside>
       <GameOverDialog 
