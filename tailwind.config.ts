@@ -121,6 +121,11 @@ export default {
           '75%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
           '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
         },
+        'defeat-display': {
+          '0%': { transform: 'scale(1.5) translateY(20px)', opacity: '0' },
+          '50%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+          '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -132,6 +137,7 @@ export default {
         'click-highlight': 'click-highlight 0.3s ease-out',
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
         'victory-display': 'victory-display 1.5s ease-out forwards',
+        'defeat-display': 'defeat-display 1.5s ease-out forwards',
       },
     },
   },

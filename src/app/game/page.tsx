@@ -29,6 +29,7 @@ import MiniMap from "@/components/sky-combat/MiniMap";
 import { cn } from "@/lib/utils";
 import Scoreboard from "@/components/sky-combat/Scoreboard";
 import VictoryAnimation from "@/components/sky-combat/VictoryAnimation";
+import DefeatAnimation from "@/components/sky-combat/DefeatAnimation";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -314,6 +315,7 @@ export default function SkyCombatPage() {
   return (
     <main className="relative flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
         <VictoryAnimation show={state.phase === 'gameOver' && state.winner === 'player'} />
+        <DefeatAnimation show={state.phase === 'gameOver' && state.winner === 'opponent'} />
         <div className={cn("absolute inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500", 
             state.currentPlayer === 'opponent' ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}>
