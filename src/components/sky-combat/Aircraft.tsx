@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -47,52 +48,76 @@ const Aircraft: React.FC<AircraftProps> = ({
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div
-          className={cn(
-            "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group",
-            aircraft.owner === "player" ? "text-primary" : "text-destructive",
-            isSelected && "bg-accent/30 scale-110 animate-glow animate-click-highlight",
-            isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
-            isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
-            isDefender && animation?.type === 'attack' && "animate-shake",
-            isAttacker && "animate-flash",
-            isDefender && animation?.type === 'heal' && 'animate-pulse'
-          )}
-          data-owner={aircraft.owner}
-        >
-          {isDefender && animation?.damage && (
-            <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">
-              -{animation.damage}
-            </div>
-          )}
-          {isDefender && animation?.healAmount && (
-            <div className="absolute -top-6 text-green-400 font-bold text-lg animate-damage-popup">
-              +{animation.healAmount}
-            </div>
-          )}
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
           <div
             className={cn(
-              "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",
-              "group-hover:scale-110"
+              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group",
+              aircraft.owner === "player" ? "text-primary" : "text-destructive",
+              isSelected && "bg-accent/30 scale-110 animate-glow animate-click-highlight",
+              isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
+              isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
+              isDefender && animation?.type === 'attack' && "animate-shake",
+              isAttacker && "animate-flash",
+              isDefender && animation?.type === 'heal' && 'animate-pulse'
             )}
+            data-owner={aircraft.owner}
           >
-            {aircraftIcons[aircraft.type]}
+            {isDefender && animation?.damage && (
+              <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">
+                -{animation.damage}
+              </div>
+            )}
+            {isDefender && animation?.healAmount && (
+              <div className="absolute -top-6 text-green-400 font-bold text-lg animate-damage-popup">
+                +{animation.healAmount}
+              </div>
+            )}
+            <div
+              className={cn(
+                "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",
+                "group-hover:scale-110"
+              )}
+            >
+              {aircraftIcons[aircraft.type]}
+            </div>
+            <div className="absolute bottom-0 w-full px-1">
+              <Progress
+                value={healthPercentage}
+                className="h-1 bg-secondary"
+                indicatorClassName={getHealthColor()}
+              />
+            </div>
           </div>
-          <div className="absolute bottom-0 w-full px-1">
-            <Progress
-              value={healthPercentage}
-              className="h-1 bg-secondary"
-              indicatorClassName={getHealthColor()}
-            />
-          </div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p className="capitalize">{aircraft.type}</p>
-      </TooltipContent>
-    </Tooltip>
+        </TooltipTrigger>
+        <TooltipContent className="w-48 p-2">
+            <div className="font-bold capitalize text-lg mb-2">{aircraft.type}</div>
+            <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                    <span>HP:</span>
+                    <span>{aircraft.stats.hp} / {aircraft.stats.maxHp}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Attack:</span>
+                    <span>{aircraft.stats.attack}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Defense:</span>
+                    <span>{aircraft.stats.defense}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Range:</span>
+                    <span>{aircraft.stats.range}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Speed:</span>
+                    <span>{aircraft.stats.speed}</span>
+                </div>
+            </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
