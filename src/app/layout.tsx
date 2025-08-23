@@ -1,11 +1,25 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { Exo_2, Orbitron } from 'next/font/google';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Sky Combat',
   description: 'An aircraft war game built with Next.js',
 };
+
+const fontHeadline = Orbitron({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-headline',
+});
+
+const fontBody = Exo_2({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+})
 
 export default function RootLayout({
   children,
@@ -14,12 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased bg-clouds">
+      <body className={cn("font-body antialiased bg-clouds", fontHeadline.variable, fontBody.variable)}>
         {children}
         <Toaster />
       </body>
