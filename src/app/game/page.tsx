@@ -44,7 +44,8 @@ type GameAction =
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
   | { type: "RESET_GAME" }
   | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage?: number, healAmount?: number } }
-  | { type: "CLEAR_ANIMATION" };
+  | { type: "CLEAR_ANIMATION" }
+  | { type: "UPDATE_STATUS_EFFECTS" };
 
 const GRID_WIDTH = 12;
 const GRID_HEIGHT = 12;
@@ -228,7 +229,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 newSupporterStats.maxHp += 5;
             }
 
-            updatedAircrafts[supporter.id] = {...supporter, stats: newSupporterStats, hasAttacked: true, specialAbilityCooldown: 2};
+            updatedAircrafts[supporter.id] = {
+                ...supporter, 
+                stats: newSupporterStats, 
+                hasAttacked: true, 
+                specialAbilityCooldown: 2,
+                statusEffects: [...supporter.statusEffects.filter(e => e !== 'empowered'), 'empowered']
+            };
             updatedAircrafts[target.id] = {...target, stats: {...target.stats, hp: newHp}};
             
             return {
@@ -287,7 +294,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
              if (a.owner === state.currentPlayer) {
                 updatedAircrafts[a.id] = {
                     ...updatedAircrafts[a.id],
-                    specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1)
+                    specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1),
+                    // empowered status wears off at the end of the turn it was used
+                    statusEffects: a.statusEffects.filter(e => e !== 'empowered')
                 }
              }
         });
@@ -317,6 +326,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
     case "CLEAR_ANIMATION":
         return {...state, animation: null};
+    
+    case "UPDATE_STATUS_EFFECTS": {
+        // This can be used to centrally manage status effects over time, e.g. stun wearing off
+        return state;
+    }
 
     default:
       return state;

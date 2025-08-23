@@ -102,6 +102,10 @@ export default {
           '0%, 100%': { filter: 'drop-shadow(0 0 2px currentColor)' },
           '50%': { filter: 'drop-shadow(0 0 5px currentColor)' },
         },
+        'empowered-glow': {
+            '0%, 100%': { filter: 'drop-shadow(0 0 3px hsl(var(--primary)))' },
+            '50%': { filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' },
+        },
         clouds: {
           '0%': { backgroundPosition: '0% 0%' },
           '100%': { backgroundPosition: '-200% -200%' },
@@ -125,6 +129,11 @@ export default {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
+        heal: {
+            '0%': {boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.7)',},
+            '70%': {boxShadow: '0 0 0 10px rgba(74, 222, 128, 0)',},
+            '100%': {boxShadow: '0 0 0 0 rgba(74, 222, 128, 0)',},
+        },
         destroy: {
             '0%': { transform: 'scale(1)', opacity: '1' },
             '100%': { transform: 'scale(0.5)', opacity: '0' },
@@ -140,11 +149,13 @@ export default {
         'shake': 'shake 0.3s ease-in-out',
         'flash': 'flash 0.2s ease-in-out',
         'glow': 'glow 1.5s ease-in-out infinite',
+        'empowered-glow': 'empowered-glow 1s ease-in-out infinite',
         'clouds': 'clouds 120s linear infinite',
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
         'victory-display': 'victory-display 1.5s ease-out forwards',
         'defeat-display': 'defeat-display 1.5s ease-out forwards',
         'spin-slow': 'spin-slow 1.5s linear infinite',
+        heal: 'heal 0.7s ease-in-out',
         'destroy': 'destroy 0.3s ease-in-out forwards',
         'low-hp-pulse': 'low-hp-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },

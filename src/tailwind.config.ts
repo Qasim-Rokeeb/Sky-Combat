@@ -102,6 +102,10 @@ export default {
           '0%, 100%': { filter: 'drop-shadow(0 0 2px currentColor)' },
           '50%': { filter: 'drop-shadow(0 0 5px currentColor)' },
         },
+        'empowered-glow': {
+            '0%, 100%': { filter: 'drop-shadow(0 0 3px hsl(var(--primary)))' },
+            '50%': { filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' },
+        },
         clouds: {
           '0%': { backgroundPosition: '0% 0%' },
           '100%': { backgroundPosition: '-200% -200%' },
@@ -145,6 +149,7 @@ export default {
         'shake': 'shake 0.3s ease-in-out',
         'flash': 'flash 0.2s ease-in-out',
         'glow': 'glow 1.5s ease-in-out infinite',
+        'empowered-glow': 'empowered-glow 1s ease-in-out infinite',
         'clouds': 'clouds 120s linear infinite',
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
         'victory-display': 'victory-display 1.5s ease-out forwards',

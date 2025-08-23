@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Send, Bomb, Shield, ZapOff, ShieldCheck } from "lucide-react";
+import { Send, Bomb, Shield, Zap, ZapOff, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Aircraft as AircraftType, GameAnimation, StatusEffect } from "@/types/game";
 import { Progress } from "@/components/ui/progress";
@@ -31,7 +31,7 @@ const aircraftIcons: Record<AircraftType["type"], React.ReactNode> = {
 const statusEffectIcons: Record<StatusEffect, React.ReactNode> = {
     stunned: <ZapOff className="w-4 h-4 text-yellow-400" />,
     shielded: <ShieldCheck className="w-4 h-4 text-blue-400" />,
-    empowered: <ZapOff className="w-4 h-4 text-purple-400" />,
+    empowered: <Zap className="w-4 h-4 text-purple-400" />,
 }
 
 const Aircraft: React.FC<AircraftProps> = ({
@@ -79,7 +79,8 @@ const Aircraft: React.FC<AircraftProps> = ({
               isDefender && animation?.type === 'heal' && 'animate-heal',
               isDestroyed && "animate-destroy",
               isLowHp && !isDestroyed && "animate-low-hp-pulse",
-              aircraft.statusEffects.includes('stunned') && "opacity-60"
+              aircraft.statusEffects.includes('stunned') && "opacity-60",
+              aircraft.statusEffects.includes('empowered') && "animate-empowered-glow",
             )}
             data-owner={aircraft.owner}
             onClick={handleWrapperClick}
