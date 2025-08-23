@@ -94,7 +94,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable, supportableAircraftIds: [] };
       }
       
-      if (action === "support" && !aircraft.hasAttacked && aircraft.type === 'support') {
+      if (action === "support" && !aircraft.hasAttacked && aircraft.type === 'support' && aircraft.specialAbilityCooldown === 0) {
           const supportable = Object.values(state.aircrafts).filter(target => {
               if(target.owner !== state.currentPlayer) return false;
               if(target.stats.hp === target.stats.maxHp) return false; // Already at max hp
@@ -194,7 +194,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             newSupporterStats.maxHp += 5;
         }
 
-        updatedAircrafts[supporter.id] = {...supporter, stats: newSupporterStats, hasAttacked: true};
+        updatedAircrafts[supporter.id] = {...supporter, stats: newSupporterStats, hasAttacked: true, specialAbilityCooldown: 2};
         updatedAircrafts[target.id] = {...target, stats: {...target.stats, hp: newHp}};
         
         return {
@@ -211,7 +211,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const updatedAircrafts = { ...state.aircrafts };
         Object.values(state.aircrafts).forEach(a => {
             if (a.owner === nextPlayer) {
-                updatedAircrafts[a.id] = { ...a, hasMoved: false, hasAttacked: false };
+                updatedAircrafts[a.id] = { 
+                    ...a, 
+                    hasMoved: false, 
+                    hasAttacked: false,
+                    specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1)
+                };
             }
         });
 

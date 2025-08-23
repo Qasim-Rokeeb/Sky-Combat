@@ -40,6 +40,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   const isPlayerTurn = gameState.currentPlayer === "player";
   const canAct = isPlayerTurn && !!selectedAircraft;
   const isSupport = selectedAircraft?.type === 'support';
+  const supportOnCooldown = isSupport && selectedAircraft.specialAbilityCooldown > 0;
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -106,11 +107,12 @@ const GameControls: React.FC<GameControlsProps> = ({
           {isSupport && (
             <Button
               onClick={() => onActionSelect("support")}
-              disabled={!canAct || selectedAircraft!.hasAttacked}
+              disabled={!canAct || selectedAircraft!.hasAttacked || supportOnCooldown}
               variant={gameState.selectedAction === 'support' ? 'default' : 'secondary'}
               className="col-span-2"
             >
               <ShieldCheck className="mr-2 h-4 w-4" /> Support
+              {supportOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
             </Button>
           )}
         </div>

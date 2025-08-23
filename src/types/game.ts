@@ -22,6 +22,7 @@ export interface Aircraft {
   position: { x: number; y: number };
   hasMoved: boolean;
   hasAttacked: boolean;
+  specialAbilityCooldown: number;
 }
 
 export type GridCell = Aircraft | null;

@@ -1,3 +1,4 @@
+
 import type { GameState, Grid, Aircraft } from "@/types/game";
 import { AIRCRAFT_STATS } from "./game-constants";
 
@@ -28,6 +29,7 @@ export const createInitialState = (width: number, height: number): GameState => 
       },
       hasMoved: false,
       hasAttacked: false,
+      specialAbilityCooldown: 0,
     };
     aircrafts[a.id] = aircraft;
     grid[a.position.y][a.position.x] = aircraft;
@@ -36,7 +38,7 @@ export const createInitialState = (width: number, height: number): GameState => 
   // Opponent aircraft
   const opponentAircraft = [
     { id: "o-f1", type: "fighter", position: { x: width - 3, y: 1 } },
-    { id:o-b1", type: "bomber", position: { x: width - 4, y: 1 } },
+    { id: "o-b1", type: "bomber", position: { x: width - 4, y: 1 } },
     { id: "o-s1", type: "support", position: { x: width - 5, y: 1 } },
   ];
 
@@ -53,6 +55,7 @@ export const createInitialState = (width: number, height: number): GameState => 
        },
       hasMoved: false,
       hasAttacked: false,
+      specialAbilityCooldown: 0,
     };
     aircrafts[a.id] = aircraft;
     grid[a.position.y][a.position.x] = aircraft;
@@ -81,7 +84,7 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
     for (const aircraft of opponentAircrafts) {
 
         // If support aircraft, try to heal
-        if (aircraft.type === 'support' && !aircraft.hasAttacked) {
+        if (aircraft.type === 'support' && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0) {
             let targetToHeal: Aircraft | null = null;
             let lowestHpPercentage = 100;
             const friendlyAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'opponent' && a.id !== aircraft.id);
