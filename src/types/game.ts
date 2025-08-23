@@ -43,7 +43,7 @@ export type GamePhase = "playing" | "gameOver";
 export type ActionType = "move" | "attack" | "special" | "none";
 
 export interface GameAnimation {
-  type: 'attack' | 'heal' | 'dodge';
+  type: 'attack' | 'heal' | 'dodge' | 'revive';
   attackerId: string;
   defenderId: string;
   damage?: number;
@@ -60,6 +60,7 @@ export interface LastMove {
 export interface GameState {
   grid: Grid;
   aircrafts: Record<string, Aircraft>;
+  destroyedAircrafts: Record<string, Aircraft>;
   currentPlayer: Player;
   phase: GamePhase;
   winner: Player | null;

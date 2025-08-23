@@ -45,9 +45,9 @@ const Aircraft: React.FC<AircraftProps> = ({
   onClick
 }) => {
   const isAttacker =
-    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge') && animation.attackerId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge' || animation?.type === 'revive') && animation.attackerId === aircraft.id;
   const isDefender =
-    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge') && animation.defenderId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge' || animation?.type === 'revive') && animation.defenderId === aircraft.id;
   const isDestroyed = aircraft.stats.hp <= 0;
 
 
@@ -78,7 +78,7 @@ const Aircraft: React.FC<AircraftProps> = ({
               isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
               isDefender && animation?.type === 'attack' && "animate-shake",
               isAttacker && "animate-flash",
-              isDefender && animation?.type === 'heal' && 'animate-heal',
+              isDefender && (animation?.type === 'heal' || animation?.type === 'revive') && 'animate-heal',
               isDefender && animation?.type === 'dodge' && 'animate-dodge',
               isDestroyed && "animate-destroy",
               isLowHp && !isDestroyed && "animate-low-hp-pulse",
@@ -110,6 +110,13 @@ const Aircraft: React.FC<AircraftProps> = ({
                 +{animation.healAmount}
               </div>
             )}
+            {isDefender && animation?.type === 'revive' && (
+                <div className="absolute -top-10 text-green-400 font-black text-xl animate-critical-popup flex items-center gap-1">
+                    <Sparkles className="w-6 h-6" />
+                    REVIVED!
+                </div>
+            )}
+
 
             <div className="absolute top-0 right-0 flex gap-1">
                 {aircraft.statusEffects.map(effect => {

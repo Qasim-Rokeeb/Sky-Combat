@@ -5,11 +5,12 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Aircraft } from "@/types/game";
-import { Shield, Bomb, Send, Heart, Swords, ShieldCheck as DefenseShield, Star } from "lucide-react";
+import { Shield, Bomb, Send, Heart, Swords, ShieldCheck as DefenseShield, Star, Skull } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface ScoreboardProps {
   aircrafts: Aircraft[];
+  destroyedAircrafts: Aircraft[];
 }
 
 const aircraftIcons = {
@@ -18,9 +19,11 @@ const aircraftIcons = {
   support: <Shield className="w-4 h-4" />,
 };
 
-const Scoreboard: React.FC<ScoreboardProps> = ({ aircrafts }) => {
+const Scoreboard: React.FC<ScoreboardProps> = ({ aircrafts, destroyedAircrafts }) => {
   const playerAircrafts = aircrafts.filter((a) => a.owner === "player");
   const opponentAircrafts = aircrafts.filter((a) => a.owner === "opponent");
+  const playerDestroyed = destroyedAircrafts.filter(a => a.owner === 'player');
+  const opponentDestroyed = destroyedAircrafts.filter(a => a.owner === 'opponent');
 
   const renderAircraftRow = (aircraft: Aircraft) => (
     <TableRow key={aircraft.id} className="text-xs">
@@ -35,6 +38,17 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ aircrafts }) => {
       <TableCell className="p-2">{aircraft.stats.level}</TableCell>
     </TableRow>
   );
+
+  const renderDestroyedRow = (aircraft: Aircraft) => (
+     <TableRow key={aircraft.id} className="text-xs opacity-50">
+      <TableCell className="p-2">
+        <div className={aircraft.owner === 'player' ? 'text-primary' : 'text-destructive'}>
+            <Skull className="w-4 h-4" />
+        </div>
+      </TableCell>
+      <TableCell className="p-2" colSpan={4}>{aircraft.type} (Destroyed)</TableCell>
+     </TableRow>
+  )
 
   return (
     <Card className="bg-secondary/50 border-primary/20">
@@ -58,6 +72,7 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ aircrafts }) => {
                 </TableHeader>
                 <TableBody>
                     {playerAircrafts.map(renderAircraftRow)}
+                    {playerDestroyed.map(renderDestroyedRow)}
                 </TableBody>
                 </Table>
             </div>
@@ -75,6 +90,7 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ aircrafts }) => {
                 </TableHeader>
                 <TableBody>
                     {opponentAircrafts.map(renderAircraftRow)}
+                    {opponentDestroyed.map(renderDestroyedRow)}
                 </TableBody>
                 </Table>
             </div>

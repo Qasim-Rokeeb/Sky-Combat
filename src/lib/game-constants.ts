@@ -35,11 +35,10 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     range: 4,
     speed: 3,
     maxEnergy: 120,
-    specialAbilityCost: 40,
-    specialAbilityDescription: "Deploys a Repair Drone to a friendly unit, restoring a portion of its health.",
+    specialAbilityCost: 100,
+    specialAbilityDescription: "Revives a destroyed friendly aircraft with 25% health. Can only be used on an empty tile.",
     critChance: 0.10, // 10%
     critDamage: 1.5, // 150% damage
     dodgeChance: 0.10, // 10%
   },
 };
-

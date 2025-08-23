@@ -38,7 +38,7 @@ type GameAction =
   | { type: "SELECT_ACTION"; payload: { action: ActionType } }
   | { type: "MOVE_AIRCRAFT"; payload: { x: number; y: number } }
   | { type: "ATTACK_AIRCRAFT"; payload: { targetId: string } }
-  | { type: "SPECIAL_AIRCRAFT"; payload: { targetId: string } }
+  | { type: "SPECIAL_AIRCRAFT"; payload: { targetId?: string, position?: { x: number, y: number} } }
   | { type: "UNDO_MOVE" }
   | { type: "END_TURN" }
   | { type: "START_OPPONENT_TURN" }
@@ -81,11 +81,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         while(queue.length > 0){
             const {x, y, dist} = queue.shift()!;
 
-            if(dist > aircraft.stats.speed) continue;
-
-            if(dist > 0 && !state.grid[y][x]){
-                highlights.push({x, y});
-            }
+            if(dist >= aircraft.stats.speed) continue;
 
             const neighbors = [{dx: 0, dy: 1}, {dx: 0, dy: -1}, {dx: 1, dy: 0}, {dx: -1, dy: 0}];
             for(const {dx, dy} of neighbors){
@@ -95,6 +91,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
                 if(newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT && !visited.has(key) && !state.grid[newY][newX]){
                     visited.add(key);
+                    highlights.push({x: newX, y: newY});
                     queue.push({x: newX, y: newY, dist: dist + 1});
                 }
             }
@@ -114,13 +111,22 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       if (action === "special" && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
           if (aircraft.type === 'support') {
-            const supportable = Object.values(state.aircrafts).filter(target => {
-                if(target.owner !== state.currentPlayer) return false;
-                if(target.stats.hp === target.stats.maxHp) return false; // Already at max hp
-                const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
-                return distance <= aircraft.stats.range;
-            }).map(a => a.id);
-            return {...state, selectedAction: 'special', actionHighlights: [], attackableAircraftIds: [], supportableAircraftIds: supportable};
+            const destroyedFriendlies = Object.values(state.destroyedAircrafts).filter(a => a.owner === state.currentPlayer);
+            if (destroyedFriendlies.length === 0) {
+                 // No one to revive, maybe heal later? For now, do nothing.
+                return {...state, selectedAction: 'none'};
+            }
+
+            // Highlight all empty tiles on the grid for revival
+             const highlights = [];
+             for(let y = 0; y < GRID_HEIGHT; y++){
+                 for(let x = 0; x < GRID_WIDTH; x++){
+                     if(!state.grid[y][x]){
+                         highlights.push({x,y});
+                     }
+                 }
+             }
+            return {...state, selectedAction: 'special', actionHighlights: highlights, attackableAircraftIds: [], supportableAircraftIds: []};
           }
       }
 
@@ -170,6 +176,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const defender = state.aircrafts[targetId];
 
       const updatedAircrafts = { ...state.aircrafts };
+      const updatedDestroyed = { ...state.destroyedAircrafts };
       let newActionLog = [...state.actionLog];
 
       const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
@@ -219,6 +226,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       let newGrid = state.grid.map(row => [...row]);
       if (newHp <= 0) {
+        updatedDestroyed[defender.id] = { ...defender, stats: { ...defender.stats, hp: 0 }};
         delete updatedAircrafts[targetId];
         newGrid[defender.position.y][defender.position.x] = null;
         newActionLog.push(`${defenderName} has been destroyed!`);
@@ -229,6 +237,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         aircrafts: updatedAircrafts,
+        destroyedAircrafts: updatedDestroyed,
         grid: newGrid,
         selectedAction: "none",
         attackableAircraftIds: [],
@@ -245,48 +254,67 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const supporter = state.aircrafts[state.selectedAircraftId];
 
         if (supporter.type === 'support') {
-            const { targetId } = action.payload;
-            const target = state.aircrafts[targetId];
-            
-            const healAmount = supporter.stats.attack; // Use attack stat for healing amount
-            const newHp = Math.min(target.stats.maxHp, target.stats.hp + healAmount);
-            const xpGained = healAmount;
+            const { position, targetId } = action.payload;
 
-            const updatedAircrafts = {...state.aircrafts};
-            const newSupporterStats = {
-                ...supporter.stats, 
-                xp: supporter.stats.xp + xpGained,
-                energy: supporter.stats.energy - supporter.stats.specialAbilityCost,
-            };
+            // Revive logic
+            const friendlyDestroyed = Object.values(state.destroyedAircrafts).filter(a => a.owner === state.currentPlayer);
+            if (friendlyDestroyed.length > 0 && position) {
+                 const aircraftToRevive = targetId // AI provides targetId
+                    ? state.destroyedAircrafts[targetId]
+                    : friendlyDestroyed[0]; // For player, just revive the first one for now
 
-            if(newSupporterStats.xp >= 100 * newSupporterStats.level){
-                newSupporterStats.level += 1;
-                newSupporterStats.xp = 0;
-                newSupporterStats.attack += 3;
-                newSupporterStats.maxHp += 5;
-            }
+                if (!aircraftToRevive) return state;
 
-            updatedAircrafts[supporter.id] = {
-                ...supporter, 
-                stats: newSupporterStats, 
-                hasAttacked: true, 
-                specialAbilityCooldown: 2,
-                statusEffects: [...supporter.statusEffects.filter(e => e !== 'empowered'), 'empowered']
-            };
-            updatedAircrafts[target.id] = {...target, stats: {...target.stats, hp: newHp}};
-            
-            const supporterName = `${supporter.owner === 'player' ? 'Player' : 'Opponent'}'s ${supporter.type}`;
-            const targetName = `${target.owner === 'player' ? 'Player' : 'Opponent'}'s ${target.type}`;
-            const logMessage = `${supporterName} healed ${targetName} for ${healAmount} HP.`;
+                const revivedAircraft: Aircraft = {
+                    ...aircraftToRevive,
+                    position: position,
+                    stats: {
+                        ...aircraftToRevive.stats,
+                        hp: Math.floor(aircraftToRevive.stats.maxHp * 0.25) // Revive with 25% health
+                    },
+                    hasMoved: true, // Cant move after being revived in the same turn
+                    hasAttacked: true, // Cant attack
+                    specialAbilityCooldown: 0,
+                    statusEffects: []
+                };
 
-            return {
-                ...state,
-                aircrafts: updatedAircrafts,
-                selectedAction: 'none',
-                supportableAircraftIds: [],
-                animation: {type: 'heal', attackerId: supporter.id, defenderId: target.id, healAmount},
-                lastMove: null,
-                actionLog: [...state.actionLog, logMessage],
+                const newAircrafts = {...state.aircrafts, [revivedAircraft.id]: revivedAircraft};
+                const newDestroyed = {...state.destroyedAircrafts};
+                delete newDestroyed[revivedAircraft.id];
+
+                const newGrid = state.grid.map(row => [...row]);
+                newGrid[position.y][position.x] = revivedAircraft;
+
+                const newSupporterStats = {
+                    ...supporter.stats, 
+                    energy: supporter.stats.energy - supporter.stats.specialAbilityCost,
+                };
+                
+                const updatedSupporter = {
+                    ...supporter, 
+                    stats: newSupporterStats, 
+                    hasAttacked: true, 
+                    specialAbilityCooldown: 5, // Long cooldown for revive
+                    statusEffects: [...supporter.statusEffects.filter(e => e !== 'empowered'), 'empowered']
+                };
+
+                newAircrafts[supporter.id] = updatedSupporter;
+                
+                const supporterName = `${supporter.owner === 'player' ? 'Player' : 'Opponent'}'s ${supporter.type}`;
+                const revivedName = `${revivedAircraft.owner === 'player' ? 'Player' : 'Opponent'}'s ${revivedAircraft.type}`;
+                const logMessage = `${supporterName} revived ${revivedName}!`;
+
+                return {
+                    ...state,
+                    aircrafts: newAircrafts,
+                    destroyedAircrafts: newDestroyed,
+                    grid: newGrid,
+                    selectedAction: 'none',
+                    actionHighlights: [],
+                    animation: {type: 'revive', attackerId: supporter.id, defenderId: revivedAircraft.id},
+                    lastMove: null,
+                    actionLog: [...state.actionLog, logMessage],
+                };
             }
         }
         return state;
@@ -419,7 +447,7 @@ export default function SkyCombatPage() {
 
   // Play ability sound effect when animation type is heal
   useEffect(() => {
-      if(state.animation?.type === 'heal' && abilityAudioRef.current){
+      if((state.animation?.type === 'heal' || state.animation?.type === 'revive') && abilityAudioRef.current){
           abilityAudioRef.current.currentTime = 0;
           abilityAudioRef.current.play();
       }
@@ -439,9 +467,12 @@ export default function SkyCombatPage() {
         if (state.attackableAircraftIds.includes(aircraft.id)) {
             dispatch({ type: "ATTACK_AIRCRAFT", payload: { targetId: aircraft.id } });
         }
-    } else if (state.selectedAircraftId && state.selectedAction === 'special' && aircraft && aircraft.owner === state.currentPlayer) {
-        if (state.supportableAircraftIds.includes(aircraft.id)){
-            dispatch({type: "SPECIAL_AIRCRAFT", payload: {targetId: aircraft.id}});
+    } else if (state.selectedAircraftId && state.selectedAction === 'special' && !aircraft) {
+        const selectedAircraft = state.aircrafts[state.selectedAircraftId];
+        if (selectedAircraft.type === 'support') {
+            if (state.actionHighlights.some(p => p.x === x && p.y === y)){
+                dispatch({type: "SPECIAL_AIRCRAFT", payload: {position: { x, y }}});
+            }
         }
     }
   };
@@ -539,7 +570,7 @@ export default function SkyCombatPage() {
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <PlayerStats aircraft={selectedAircraft} />
         <MiniMap gameState={state} />
-        <Scoreboard aircrafts={Object.values(state.aircrafts)} />
+        <Scoreboard aircrafts={Object.values(state.aircrafts)} destroyedAircrafts={Object.values(state.destroyedAircrafts)} />
         <ActionLog log={state.actionLog} />
       </aside>
       <div className="flex-grow flex items-center justify-center">

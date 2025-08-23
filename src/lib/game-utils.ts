@@ -84,6 +84,7 @@ export const createInitialState = (width: number, height: number): GameState => 
   return {
     grid,
     aircrafts,
+    destroyedAircrafts: {},
     currentPlayer: "player",
     phase: "playing",
     winner: null,
@@ -105,31 +106,35 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
     
     for (const aircraft of opponentAircrafts) {
 
-        // If support aircraft, try to heal
-        if (aircraft.type === 'support' && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0) {
-            let targetToHeal: Aircraft | null = null;
-            let lowestHpPercentage = 100;
-            const friendlyAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'opponent' && a.id !== aircraft.id);
+        // If support aircraft, try to revive a fallen comrade
+        if (aircraft.type === 'support' && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
+            const friendlyDestroyed = Object.values(state.destroyedAircrafts).filter(a => a.owner === 'opponent');
+            if (friendlyDestroyed.length > 0) {
+                // Find an empty tile to revive on
+                let reviveTile: {x: number, y: number} | null = null;
+                const { x, y } = aircraft.position;
 
-            for (const target of friendlyAircrafts) {
-                const distance = Math.abs(aircraft.position.x - target.position.x) + Math.abs(aircraft.position.y - target.position.y);
-                const hpPercentage = (target.stats.hp / target.stats.maxHp) * 100;
-
-                if (distance <= aircraft.stats.range && hpPercentage < 100 && hpPercentage < lowestHpPercentage) {
-                    targetToHeal = target;
-                    lowestHpPercentage = hpPercentage;
+                // Check adjacent tiles
+                const adjacent = [{dx:0, dy:1}, {dx:0, dy:-1}, {dx:1, dy:0}, {dx:-1, dy:0}];
+                for (const {dx, dy} of adjacent) {
+                    const newX = x + dx;
+                    const newY = y + dy;
+                    if (newX >= 0 && newX < state.grid[0].length && newY >= 0 && newY < state.grid.length && !state.grid[newY][newX]) {
+                        reviveTile = { x: newX, y: newY };
+                        break;
+                    }
                 }
-            }
-
-            if (targetToHeal && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                dispatch({ type: 'SELECT_AIRCRAFT', payload: { aircraftId: aircraft.id } });
-                await new Promise(resolve => setTimeout(resolve, 200));
-                dispatch({ type: 'SELECT_ACTION', payload: { action: 'special' } });
-                await new Promise(resolve => setTimeout(resolve, 200));
-                dispatch({ type: 'SPECIAL_AIRCRAFT', payload: { targetId: targetToHeal.id } });
-                await new Promise(resolve => setTimeout(resolve, 500));
-                continue; // Next aircraft
+                
+                if (reviveTile) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    dispatch({ type: 'SELECT_AIRCRAFT', payload: { aircraftId: aircraft.id } });
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    dispatch({ type: 'SELECT_ACTION', payload: { action: 'special' } });
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    dispatch({ type: 'SPECIAL_AIRCRAFT', payload: { targetId: friendlyDestroyed[0].id, position: reviveTile } });
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    continue; // Next aircraft
+                }
             }
         }
 
@@ -175,22 +180,41 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
                 let bestMove: {x: number, y: number} | null = null;
                 let bestMoveDistance = Infinity;
 
-                for (let i = -aircraft.stats.speed; i <= aircraft.stats.speed; i++) {
-                    for (let j = -aircraft.stats.speed; j <= aircraft.stats.speed; j++) {
-                        if (Math.abs(i) + Math.abs(j) > aircraft.stats.speed || (i === 0 && j === 0)) continue;
+                // Simple pathfinding: move towards target
+                const dx = Math.sign(closestTarget.position.x - aircraft.position.x);
+                const dy = Math.sign(closestTarget.position.y - aircraft.position.y);
 
-                        const newX = aircraft.position.x + i;
-                        const newY = aircraft.position.y + j;
-                        
-                        if (newX >= 0 && newX < state.grid[0].length && newY >= 0 && newY < state.grid.length && !state.grid[newY][newX]) {
-                           const distanceToTarget = Math.abs(newX - closestTarget.position.x) + Math.abs(newY - closestTarget.position.y);
-                           if(distanceToTarget < bestMoveDistance){
-                               bestMoveDistance = distanceToTarget;
-                               bestMove = {x: newX, y: newY};
-                           }
-                        }
+                let possibleMoves = [];
+                for (let i = 1; i <= aircraft.stats.speed; i++) {
+                    // Try moving horizontally then vertically
+                    let moveX = aircraft.position.x + i * dx;
+                    let moveY = aircraft.position.y;
+                     if(Math.abs(dx) + Math.abs(dy) > i) {
+                        moveY = aircraft.position.y + (i - Math.abs(dx)) * dy;
+                     }
+                    if(moveX >= 0 && moveX < state.grid[0].length && moveY >= 0 && moveY < state.grid.length && !state.grid[moveY][moveX]){
+                        possibleMoves.push({x: moveX, y: moveY});
+                    }
+                    // Try moving vertically then horizontally
+                    moveX = aircraft.position.x;
+                    moveY = aircraft.position.y + i * dy;
+                    if(Math.abs(dx) + Math.abs(dy) > i){
+                         moveX = aircraft.position.x + (i - Math.abs(dy)) * dx;
+                    }
+                    if(moveX >= 0 && moveX < state.grid[0].length && moveY >= 0 && moveY < state.grid.length && !state.grid[moveY][moveX]){
+                        possibleMoves.push({x: moveX, y: moveY});
                     }
                 }
+                
+                // Find the best move among possibilities
+                 for(const move of possibleMoves){
+                    const distanceToTarget = Math.abs(move.x - closestTarget.position.x) + Math.abs(move.y - closestTarget.position.y);
+                    if(distanceToTarget < bestMoveDistance){
+                        bestMoveDistance = distanceToTarget;
+                        bestMove = move;
+                    }
+                }
+
 
                 if(bestMove){
                     await new Promise(resolve => setTimeout(resolve, 300));
