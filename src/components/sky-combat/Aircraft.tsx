@@ -55,7 +55,7 @@ const Aircraft: React.FC<AircraftProps> = ({
             className={cn(
               "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group",
               aircraft.owner === "player" ? "text-primary" : "text-destructive",
-              isSelected && "bg-accent/30 scale-110 animate-glow animate-click-highlight",
+              isSelected && "bg-accent/30 scale-110 animate-glow",
               isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
               isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
               isDefender && animation?.type === 'attack' && "animate-shake",
