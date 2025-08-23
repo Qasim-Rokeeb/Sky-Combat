@@ -187,6 +187,7 @@ export default function SkyCombatPage() {
   const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT));
   const { toast } = useToast();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.5);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const toggleMusic = () => {
@@ -199,6 +200,16 @@ export default function SkyCombatPage() {
         setIsMusicPlaying(!isMusicPlaying);
     }
   };
+
+  const handleVolumeChange = (newVolume: number[]) => {
+    setVolume(newVolume[0]);
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   const handleCellClick = (x: number, y: number, aircraft: Aircraft | null) => {
     if (state.phase === 'gameOver') return;
@@ -300,6 +311,8 @@ export default function SkyCombatPage() {
           onEndTurn={handleEndTurn}
           isMusicPlaying={isMusicPlaying}
           onToggleMusic={toggleMusic}
+          volume={volume}
+          onVolumeChange={handleVolumeChange}
         />
       </aside>
       <GameOverDialog 

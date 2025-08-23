@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2 } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import StrategyAssistant from "./StrategyAssistant";
 import { Progress } from "../ui/progress";
 import Link from "next/link";
 import { ThemeToggle } from "../theme-toggle";
+import { Slider } from "../ui/slider";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -19,6 +20,8 @@ interface GameControlsProps {
   onEndTurn: () => void;
   isMusicPlaying: boolean;
   onToggleMusic: () => void;
+  volume: number;
+  onVolumeChange: (value: number[]) => void;
 }
 
 const GameControls: React.FC<GameControlsProps> = ({
@@ -27,6 +30,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   onEndTurn,
   isMusicPlaying,
   onToggleMusic,
+  volume,
+  onVolumeChange,
 }) => {
   const selectedAircraft = gameState.selectedAircraftId
     ? gameState.aircrafts[gameState.selectedAircraftId]
@@ -51,6 +56,20 @@ const GameControls: React.FC<GameControlsProps> = ({
             </Link>
         </div>
       </div>
+
+      <Card className="bg-secondary/50 border-primary/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Volume2 className="text-accent" />
+            <Slider
+              value={[volume]}
+              onValueChange={onVolumeChange}
+              max={1}
+              step={0.1}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
 
       <Card className="bg-secondary/50 border-primary/20">
