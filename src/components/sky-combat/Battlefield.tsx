@@ -5,6 +5,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import type { Grid, Aircraft, GameAnimation } from "@/types/game";
 import AircraftComponent from "./Aircraft";
+import { Bomb } from "lucide-react";
 
 interface BattlefieldProps {
   grid: Grid;
@@ -65,7 +66,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
 
 
   return (
-    <div className="aspect-square w-full max-w-[calc(100vh-4rem)] bg-card/50 backdrop-blur-sm rounded-lg p-2 shadow-inner border border-primary/20">
+    <div className="relative aspect-square w-full max-w-[calc(100vh-4rem)] bg-card/50 backdrop-blur-sm rounded-lg p-2 shadow-inner border border-primary/20">
       <div
         className="grid h-full w-full"
         style={{
@@ -107,6 +108,22 @@ const Battlefield: React.FC<BattlefieldProps> = ({
           })
         )}
       </div>
+
+        {animation?.type === 'finalExplosion' && animation.position && (
+            <div 
+                className="absolute flex items-center justify-center pointer-events-none"
+                style={{
+                    left: `${(animation.position.x / grid[0].length) * 100}%`,
+                    top: `${(animation.position.y / grid.length) * 100}%`,
+                    width: `${(1 / grid[0].length) * 100}%`,
+                    height: `${(1 / grid.length) * 100}%`,
+                }}
+            >
+                <div className="text-destructive animate-final-explosion">
+                    <Bomb className="w-16 h-16" />
+                </div>
+            </div>
+        )}
     </div>
   );
 };

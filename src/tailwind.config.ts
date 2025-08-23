@@ -150,6 +150,11 @@ export default {
         'dodge': {
             '0%, 100%': { transform: 'translateX(0)' },
             '50%': { transform: 'translateX(10px) scale(1.1)' },
+        },
+        'final-explosion': {
+            '0%': { transform: 'scale(0)', opacity: '0' },
+            '50%': { transform: 'scale(3) rotate(360deg)', opacity: '1' },
+            '100%': { transform: 'scale(2.5)', opacity: '0' },
         }
       },
       animation: {
@@ -169,6 +174,7 @@ export default {
         'destroy': 'destroy 0.3s ease-in-out forwards',
         'low-hp-pulse': 'low-hp-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'dodge': 'dodge 0.3s ease-in-out',
+        'final-explosion': 'final-explosion 0.7s ease-out forwards',
       },
     },
   },

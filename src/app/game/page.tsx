@@ -178,6 +178,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const updatedAircrafts = { ...state.aircrafts };
       const updatedDestroyed = { ...state.destroyedAircrafts };
       let newActionLog = [...state.actionLog];
+      let animation = state.animation;
 
       const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
       const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
@@ -230,8 +231,14 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         delete updatedAircrafts[targetId];
         newGrid[defender.position.y][defender.position.x] = null;
         newActionLog.push(`${defenderName} has been destroyed!`);
+
+        const remainingDefenders = Object.values(updatedAircrafts).filter(a => a.owner === defender.owner);
+        if (remainingDefenders.length === 0) {
+             animation = { type: 'finalExplosion', attackerId: attacker.id, defenderId: defender.id, position: defender.position };
+        }
       } else {
         updatedAircrafts[targetId] = { ...defender, stats: { ...defender.stats, hp: newHp } };
+        animation = { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage, isCritical };
       }
 
       return {
@@ -242,7 +249,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         attackableAircraftIds: [],
         supportableAircraftIds: [],
-        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage, isCritical },
+        animation,
         lastMove: null,
         actionLog: newActionLog,
       };
