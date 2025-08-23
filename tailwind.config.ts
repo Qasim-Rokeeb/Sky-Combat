@@ -105,6 +105,11 @@ export default {
           '0%': { backgroundPosition: '0% 0%' },
           '100%': { backgroundPosition: '-200% -200%' },
         },
+        'click-highlight': {
+            '0%': { transform: 'scale(1)', filter: 'brightness(1)' },
+            '50%': { transform: 'scale(1.05)', filter: 'brightness(1.2)' },
+            '100%': { transform: 'scale(1)', filter: 'brightness(1)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -113,6 +118,7 @@ export default {
         'flash': 'flash 0.2s ease-in-out',
         'glow': 'glow 1.5s ease-in-out infinite',
         'clouds': 'clouds 120s linear infinite',
+        'click-highlight': 'click-highlight 0.3s ease-out',
       },
     },
   },
