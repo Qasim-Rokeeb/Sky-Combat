@@ -1,3 +1,4 @@
+
 import type { AircraftStats } from "@/types/game";
 
 export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<AircraftStats, 'hp' | 'xp' | 'level'>> = {
@@ -11,8 +12,8 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
   bomber: {
     maxHp: 120,
     attack: 50,
-    defense: 5,
-    range: 1,
+    defense: 10,
+    range: 2,
     speed: 3,
   },
   support: {
