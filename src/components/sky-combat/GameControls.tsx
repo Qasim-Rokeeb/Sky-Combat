@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2 } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ interface GameControlsProps {
   gameState: GameState;
   onActionSelect: (action: ActionType) => void;
   onEndTurn: () => void;
+  onUndoMove: () => void;
   isMusicPlaying: boolean;
   onToggleMusic: () => void;
   volume: number;
@@ -30,6 +31,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   gameState,
   onActionSelect,
   onEndTurn,
+  onUndoMove,
   isMusicPlaying,
   onToggleMusic,
   volume,
@@ -45,6 +47,9 @@ const GameControls: React.FC<GameControlsProps> = ({
   const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
   const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
   const specialAbilityDescription = selectedAircraft ? AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription : "";
+
+  const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id && !selectedAircraft.hasAttacked;
+
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -94,13 +99,26 @@ const GameControls: React.FC<GameControlsProps> = ({
       <div className="space-y-2">
         <h3 className="font-semibold text-center font-headline">Actions</h3>
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={() => onActionSelect("move")}
-            disabled={!canAct || selectedAircraft!.hasMoved}
-            variant={gameState.selectedAction === 'move' ? 'default' : 'secondary'}
-          >
-            <Move className="mr-2 h-4 w-4" /> Move
-          </Button>
+          <div className="col-span-2 relative">
+            <Button
+              onClick={() => onActionSelect("move")}
+              disabled={!canAct || selectedAircraft!.hasMoved}
+              variant={gameState.selectedAction === 'move' ? 'default' : 'secondary'}
+              className="w-full"
+            >
+              <Move className="mr-2 h-4 w-4" /> Move
+            </Button>
+            {canUndo && (
+              <Button
+                onClick={onUndoMove}
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+              >
+                <Undo2 />
+              </Button>
+            )}
+          </div>
           <Button
             onClick={() => onActionSelect("attack")}
             disabled={!canAct || selectedAircraft!.hasAttacked}

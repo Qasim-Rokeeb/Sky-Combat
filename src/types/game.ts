@@ -44,6 +44,12 @@ export interface GameAnimation {
   healAmount?: number;
 }
 
+export interface LastMove {
+    aircraftId: string;
+    from: { x: number; y: number };
+    to: { x: number; y: number };
+}
+
 export interface GameState {
   grid: Grid;
   aircrafts: Record<string, Aircraft>;
@@ -57,4 +63,5 @@ export interface GameState {
   supportableAircraftIds: string[];
   animation: GameAnimation | null;
   turnNumber: number;
+  lastMove: LastMove | null;
 }

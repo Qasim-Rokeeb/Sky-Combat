@@ -106,6 +106,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     supportableAircraftIds: [],
     animation: null,
     turnNumber: 1,
+    lastMove: null,
   };
 };
 

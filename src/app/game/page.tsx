@@ -18,6 +18,7 @@ import type {
   ActionType,
   Aircraft,
   Grid,
+  LastMove,
 } from "@/types/game";
 import { createInitialState, opponentAI } from "@/lib/game-utils";
 import Battlefield from "@/components/sky-combat/Battlefield";
@@ -37,6 +38,7 @@ type GameAction =
   | { type: "MOVE_AIRCRAFT"; payload: { x: number; y: number } }
   | { type: "ATTACK_AIRCRAFT"; payload: { targetId: string } }
   | { type: "SPECIAL_AIRCRAFT"; payload: { targetId: string } }
+  | { type: "UNDO_MOVE" }
   | { type: "END_TURN" }
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
@@ -140,12 +142,19 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       const updatedAircraft = { ...aircraft, position: { x, y }, hasMoved: true };
       
+      const lastMove: LastMove = {
+          aircraftId: aircraft.id,
+          from: aircraft.position,
+          to: {x, y},
+      }
+
       return {
         ...state,
         grid: newGrid,
         aircrafts: { ...state.aircrafts, [state.selectedAircraftId]: updatedAircraft },
         selectedAction: "none",
         actionHighlights: [],
+        lastMove,
       };
     }
 
@@ -188,6 +197,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         attackableAircraftIds: [],
         supportableAircraftIds: [],
         animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage },
+        lastMove: null,
       };
     }
     
@@ -221,24 +231,56 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 aircrafts: updatedAircrafts,
                 selectedAction: 'none',
                 supportableAircraftIds: [],
-                animation: {type: 'heal', attackerId: supporter.id, defenderId: target.id, healAmount}
+                animation: {type: 'heal', attackerId: supporter.id, defenderId: target.id, healAmount},
+                lastMove: null,
             }
         }
         return state;
     }
     
+    case "UNDO_MOVE": {
+        if (!state.lastMove) return state;
+        const { aircraftId, from, to } = state.lastMove;
+        const aircraft = state.aircrafts[aircraftId];
+        
+        // Check if the aircraft is still in the 'to' position
+        if (state.grid[to.y][to.x]?.id !== aircraftId) return state;
+
+        const newGrid = state.grid.map(row => [...row]);
+        newGrid[to.y][to.x] = null;
+        newGrid[from.y][from.x] = aircraft;
+
+        const updatedAircraft = { ...aircraft, position: from, hasMoved: false };
+
+        return {
+            ...state,
+            grid: newGrid,
+            aircrafts: { ...state.aircrafts, [aircraftId]: updatedAircraft },
+            lastMove: null,
+            selectedAction: 'none',
+            actionHighlights: [],
+        };
+    }
+
     case "END_TURN": {
         const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
         const updatedAircrafts = { ...state.aircrafts };
         Object.values(state.aircrafts).forEach(a => {
+            // Reset hasMoved/hasAttacked only for the player whose turn is starting
             if (a.owner === nextPlayer) {
                 updatedAircrafts[a.id] = { 
                     ...a, 
                     hasMoved: false, 
                     hasAttacked: false,
-                    specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1)
                 };
             }
+            // Cooldowns tick down for everyone at the end of the current player's turn.
+             if (a.owner === state.currentPlayer) {
+                updatedAircrafts[a.id] = {
+                    ...updatedAircrafts[a.id],
+                    specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1)
+                }
+             }
         });
 
         return {
@@ -251,6 +293,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             supportableAircraftIds: [],
             aircrafts: updatedAircrafts,
             turnNumber: nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber,
+            lastMove: null, // Clear last move on turn end
         };
     }
 
@@ -332,6 +375,10 @@ export default function SkyCombatPage() {
     dispatch({ type: "END_TURN" });
   };
   
+  const handleUndoMove = () => {
+    dispatch({ type: "UNDO_MOVE" });
+  };
+
   const handleResetGame = () => {
       setShowGameOverDialog(false);
       dispatch({type: 'RESET_GAME'});
@@ -426,6 +473,7 @@ export default function SkyCombatPage() {
           gameState={state}
           onActionSelect={handleActionSelect}
           onEndTurn={handleEndTurn}
+          onUndoMove={handleUndoMove}
           isMusicPlaying={isMusicPlaying}
           onToggleMusic={toggleMusic}
           volume={volume}
@@ -440,5 +488,3 @@ export default function SkyCombatPage() {
     </main>
   );
 }
-
-    
