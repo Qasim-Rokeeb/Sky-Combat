@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -39,8 +39,9 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const isPlayerTurn = gameState.currentPlayer === "player";
   const canAct = isPlayerTurn && !!selectedAircraft;
-  const isSupport = selectedAircraft?.type === 'support';
-  const supportOnCooldown = isSupport && selectedAircraft.specialAbilityCooldown > 0;
+  
+  const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
+  const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -104,15 +105,15 @@ const GameControls: React.FC<GameControlsProps> = ({
           >
             <Crosshair className="mr-2 h-4 w-4" /> Attack
           </Button>
-          {isSupport && (
+          {hasSpecialAbility && (
             <Button
-              onClick={() => onActionSelect("support")}
-              disabled={!canAct || selectedAircraft!.hasAttacked || supportOnCooldown}
-              variant={gameState.selectedAction === 'support' ? 'default' : 'secondary'}
+              onClick={() => onActionSelect("special")}
+              disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown}
+              variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
               className="col-span-2"
             >
-              <ShieldCheck className="mr-2 h-4 w-4" /> Support
-              {supportOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
+              <Zap className="mr-2 h-4 w-4" /> Special Ability
+              {specialAbilityOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
             </Button>
           )}
         </div>

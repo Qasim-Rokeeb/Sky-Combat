@@ -103,9 +103,9 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
                 await new Promise(resolve => setTimeout(resolve, 300));
                 dispatch({ type: 'SELECT_AIRCRAFT', payload: { aircraftId: aircraft.id } });
                 await new Promise(resolve => setTimeout(resolve, 200));
-                dispatch({ type: 'SELECT_ACTION', payload: { action: 'support' } });
+                dispatch({ type: 'SELECT_ACTION', payload: { action: 'special' } });
                 await new Promise(resolve => setTimeout(resolve, 200));
-                dispatch({ type: 'SUPPORT_AIRCRAFT', payload: { targetId: targetToHeal.id } });
+                dispatch({ type: 'SPECIAL_AIRCRAFT', payload: { targetId: targetToHeal.id } });
                 await new Promise(resolve => setTimeout(resolve, 500));
                 continue; // Next aircraft
             }

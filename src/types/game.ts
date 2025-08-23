@@ -30,7 +30,7 @@ export type Grid = GridCell[][];
 
 export type GamePhase = "playing" | "gameOver";
 
-export type ActionType = "move" | "attack" | "support" | "none";
+export type ActionType = "move" | "attack" | "special" | "none";
 
 export interface GameAnimation {
   type: 'attack' | 'heal';
