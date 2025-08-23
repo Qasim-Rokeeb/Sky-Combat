@@ -8,15 +8,18 @@ import { Gamepad2, Rocket, Zap } from "lucide-react";
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background to-primary/20 text-foreground">
-      <header className="container mx-auto px-4 py-6 flex items-center gap-4">
-        <Rocket className="w-10 h-10 text-primary" />
-        <h1 className="text-4xl font-bold font-headline tracking-widest text-primary animate-glow">
-          Sky Combat
-        </h1>
+      <header className="container mx-auto px-4 py-8 text-center bg-primary/10 rounded-b-3xl shadow-lg">
+        <div className="flex justify-center items-center gap-4 mb-4">
+          <Rocket className="w-12 h-12 text-primary" />
+          <h1 className="text-5xl md:text-6xl font-bold font-headline tracking-widest text-primary animate-glow">
+            Sky Combat
+          </h1>
+          <Rocket className="w-12 h-12 text-primary" />
+        </div>
       </header>
 
       <main className="flex-grow">
-        <section className="relative h-[60vh] flex items-center justify-center text-center px-4 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
+        <section className="relative flex items-center justify-center text-center px-4 py-20 md:py-28">
           <div className="z-10">
             <h2 className="text-5xl md:text-7xl font-bold font-headline mb-4">
               Dominate the Skies
