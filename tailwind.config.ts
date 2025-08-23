@@ -100,7 +100,11 @@ export default {
         glow: {
           '0%, 100%': { filter: 'drop-shadow(0 0 2px currentColor)' },
           '50%': { filter: 'drop-shadow(0 0 5px currentColor)' },
-        }
+        },
+        clouds: {
+          '0%': { backgroundPosition: '0% 0%' },
+          '100%': { backgroundPosition: '-200% -200%' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -108,6 +112,7 @@ export default {
         'shake': 'shake 0.3s ease-in-out',
         'flash': 'flash 0.2s ease-in-out',
         'glow': 'glow 1.5s ease-in-out infinite',
+        'clouds': 'clouds 120s linear infinite',
       },
     },
   },
