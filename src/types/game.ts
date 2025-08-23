@@ -14,6 +14,8 @@ export interface AircraftStats {
   level: number;
   energy: number;
   maxEnergy: number;
+  actionPoints: number;
+  maxActionPoints: number;
   specialAbilityCost: number;
   specialAbilityDescription: string;
   critChance: number;
@@ -29,8 +31,6 @@ export interface Aircraft {
   type: AircraftType;
   stats: AircraftStats;
   position: { x: number; y: number };
-  hasMoved: boolean;
-  hasAttacked: boolean;
   specialAbilityCooldown: number;
   statusEffects: StatusEffect[];
 }

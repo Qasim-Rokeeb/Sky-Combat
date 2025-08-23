@@ -3,7 +3,7 @@ import type { AircraftStats } from "@/types/game";
 
 export const TURN_TIME_LIMIT = 30; // seconds
 
-export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<AircraftStats, 'hp' | 'xp' | 'level' | 'energy'>> = {
+export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<AircraftStats, 'hp' | 'xp' | 'level' | 'energy' | 'actionPoints'>> = {
   fighter: {
     maxHp: 100,
     attack: 30,
@@ -11,6 +11,7 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     range: 3,
     speed: 4,
     maxEnergy: 100,
+    maxActionPoints: 2,
     specialAbilityCost: 50,
     specialAbilityDescription: "A powerful, precise strike against a single target. High damage, but requires careful positioning.",
     critChance: 0.15, // 15%
@@ -24,6 +25,7 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     range: 2,
     speed: 3,
     maxEnergy: 100,
+    maxActionPoints: 2,
     specialAbilityCost: 75,
     specialAbilityDescription: "Drops a payload of explosives, damaging all units in a target area.",
     critChance: 0.05, // 5%
@@ -37,6 +39,7 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     range: 4,
     speed: 3,
     maxEnergy: 120,
+    maxActionPoints: 2,
     specialAbilityCost: 100,
     specialAbilityDescription: "Revives a destroyed friendly aircraft with 25% health. Can only be used on an empty tile.",
     critChance: 0.10, // 10%

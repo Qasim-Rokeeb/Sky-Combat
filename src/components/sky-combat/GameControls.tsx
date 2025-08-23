@@ -43,14 +43,14 @@ const GameControls: React.FC<GameControlsProps> = ({
     : null;
 
   const isPlayerTurn = gameState.currentPlayer === "player";
-  const canAct = isPlayerTurn && !!selectedAircraft;
+  const canAct = isPlayerTurn && selectedAircraft && selectedAircraft.stats.actionPoints > 0;
   
   const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
   const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
   const hasEnoughEnergy = selectedAircraft && selectedAircraft.stats.energy >= selectedAircraft.stats.specialAbilityCost;
-  const specialAbilityDescription = selectedAircraft ? `${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription} (Cost: ${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityCost} Energy)` : "";
+  const specialAbilityDescription = selectedAircraft ? `${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription} (Cost: ${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityCost} Energy, 1 AP)` : "";
 
-  const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id && !selectedAircraft.hasAttacked;
+  const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id;
   
   const timerPercentage = (gameState.turnTimeRemaining / TURN_TIME_LIMIT) * 100;
 
@@ -119,11 +119,11 @@ const GameControls: React.FC<GameControlsProps> = ({
           <div className="col-span-2 relative">
             <Button
               onClick={() => onActionSelect("move")}
-              disabled={!canAct || selectedAircraft!.hasMoved}
+              disabled={!canAct}
               variant={gameState.selectedAction === 'move' ? 'default' : 'secondary'}
               className="w-full"
             >
-              <Move className="mr-2 h-4 w-4" /> Move
+              <Move className="mr-2 h-4 w-4" /> Move (1 AP)
             </Button>
             {canUndo && (
               <Button
@@ -138,23 +138,26 @@ const GameControls: React.FC<GameControlsProps> = ({
           </div>
           <Button
             onClick={() => onActionSelect("attack")}
-            disabled={!canAct || selectedAircraft!.hasAttacked}
+            disabled={!canAct}
             variant={gameState.selectedAction === 'attack' ? 'destructive' : 'secondary'}
           >
-            <Crosshair className="mr-2 h-4 w-4" /> Attack
+            <Crosshair className="mr-2 h-4 w-4" /> Attack (1 AP)
           </Button>
           {hasSpecialAbility && (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild className="col-span-2">
-                    <Button
-                    onClick={() => onActionSelect("special")}
-                    disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown || !hasEnoughEnergy}
-                    variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
-                    >
-                    <Zap className="mr-2 h-4 w-4" /> Special Ability
-                    {specialAbilityOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
-                    </Button>
+                <TooltipTrigger asChild>
+                    <div className="col-span-2">
+                        <Button
+                        onClick={() => onActionSelect("special")}
+                        disabled={!canAct || specialAbilityOnCooldown || !hasEnoughEnergy}
+                        variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
+                        className="w-full"
+                        >
+                        <Zap className="mr-2 h-4 w-4" /> Special Ability
+                        {specialAbilityOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
+                        </Button>
+                    </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{specialAbilityDescription}</p>

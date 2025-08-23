@@ -48,10 +48,9 @@ export const createInitialState = (width: number, height: number): GameState => 
         xp: 0,
         level: 1,
         energy: baseStats.maxEnergy,
+        actionPoints: baseStats.maxActionPoints,
         dodgeChance: baseStats.dodgeChance,
       },
-      hasMoved: false,
-      hasAttacked: false,
       specialAbilityCooldown: 0,
       statusEffects: [],
     };
@@ -106,9 +105,10 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
     const playerAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'player');
     
     for (const aircraft of opponentAircrafts) {
+        if(aircraft.stats.actionPoints <= 0) continue;
 
         // If support aircraft, try to revive a fallen comrade
-        if (aircraft.type === 'support' && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
+        if (aircraft.type === 'support' && aircraft.stats.actionPoints > 0 && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
             const friendlyDestroyed = Object.values(state.destroyedAircrafts).filter(a => a.owner === 'opponent');
             if (friendlyDestroyed.length > 0) {
                 // Find an empty tile to revive on
@@ -134,14 +134,14 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
                     await new Promise(resolve => setTimeout(resolve, 200));
                     dispatch({ type: 'SPECIAL_AIRCRAFT', payload: { targetId: friendlyDestroyed[0].id, position: reviveTile } });
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    continue; // Next aircraft
+                    if(aircraft.stats.actionPoints - 1 <= 0) continue; 
                 }
             }
         }
 
 
         // 1. Try to attack
-        if (!aircraft.hasAttacked) {
+        if (aircraft.stats.actionPoints > 0) {
             let targetToAttack: Aircraft | null = null;
             let minDistance = Infinity;
 
@@ -161,12 +161,12 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
                 await new Promise(resolve => setTimeout(resolve, 200));
                 dispatch({ type: 'ATTACK_AIRCRAFT', payload: { targetId: targetToAttack.id } });
                 await new Promise(resolve => setTimeout(resolve, 500)); // wait for animation
-                continue; // Next aircraft
+                 if(aircraft.stats.actionPoints - 1 <= 0) continue; 
             }
         }
 
         // 2. If cannot act, move towards the closest player
-        if (!aircraft.hasMoved) {
+        if (aircraft.stats.actionPoints > 0) {
             let closestTarget: Aircraft | null = null;
             let minDistance = Infinity;
             for (const target of playerAircrafts) {

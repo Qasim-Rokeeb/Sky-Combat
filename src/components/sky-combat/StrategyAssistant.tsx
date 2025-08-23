@@ -29,9 +29,8 @@ const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
       owner: a.owner,
       type: a.type,
       hp: a.stats.hp,
+      ap: a.stats.actionPoints,
       position: a.position,
-      canMove: !a.hasMoved,
-      canAttack: !a.hasAttacked,
     }));
 
     const serializedState = JSON.stringify(

@@ -74,8 +74,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       if (!state.selectedAircraftId) return state;
       const { action } = action.payload;
       const aircraft = state.aircrafts[state.selectedAircraftId];
+      if (aircraft.stats.actionPoints <= 0) return state;
 
-      if (action === "move" && !aircraft.hasMoved) {
+      if (action === "move") {
         const highlights = [];
         const queue: {x: number, y: number, dist: number}[] = [{x: aircraft.position.x, y: aircraft.position.y, dist: 0}];
         const visited = new Set<string>([`${aircraft.position.x},${aircraft.position.y}`]);
@@ -102,7 +103,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, selectedAction: "move", actionHighlights: highlights, attackableAircraftIds: [], supportableAircraftIds: [] };
       }
 
-      if (action === "attack" && !aircraft.hasAttacked) {
+      if (action === "attack") {
         const attackable = Object.values(state.aircrafts).filter(target => {
           if (target.owner === state.currentPlayer) return false;
           const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
@@ -111,7 +112,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable, supportableAircraftIds: [] };
       }
       
-      if (action === "special" && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
+      if (action === "special" && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
           if (aircraft.type === 'support') {
             const destroyedFriendlies = Object.values(state.destroyedAircrafts).filter(a => a.owner === state.currentPlayer);
             if (destroyedFriendlies.length === 0) {
@@ -145,12 +146,17 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       if (!state.selectedAircraftId || state.selectedAction !== "move") return state;
       const { x, y } = action.payload;
       const aircraft = state.aircrafts[state.selectedAircraftId];
+      if (aircraft.stats.actionPoints <= 0) return state;
 
       const newGrid: Grid = state.grid.map(row => [...row]);
       newGrid[aircraft.position.y][aircraft.position.x] = null;
       newGrid[y][x] = aircraft;
 
-      const updatedAircraft = { ...aircraft, position: { x, y }, hasMoved: true };
+      const updatedAircraft = { 
+          ...aircraft, 
+          position: { x, y }, 
+          stats: {...aircraft.stats, actionPoints: aircraft.stats.actionPoints - 1} 
+      };
       
       const lastMove: LastMove = {
           aircraftId: aircraft.id,
@@ -175,6 +181,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       if (!state.selectedAircraftId || state.selectedAction !== "attack") return state;
       const { targetId } = action.payload;
       const attacker = state.aircrafts[state.selectedAircraftId];
+      if (attacker.stats.actionPoints <= 0) return state;
+
       const defender = state.aircrafts[targetId];
 
       const updatedAircrafts = { ...state.aircrafts };
@@ -185,7 +193,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
       const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
       
-      updatedAircrafts[attacker.id] = { ...attacker, hasAttacked: true };
+      updatedAircrafts[attacker.id] = { ...attacker, stats: {...attacker.stats, actionPoints: attacker.stats.actionPoints - 1} };
 
       // Dodge check
       const didDodge = Math.random() < defender.stats.dodgeChance;
@@ -209,7 +217,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const newHp = defender.stats.hp - damage;
       const xpGained = damage; // Gain XP equal to damage dealt
 
-      const newAttackerStats = { ...attacker.stats, xp: attacker.stats.xp + xpGained };
+      const newAttackerStats = { ...attacker.stats, xp: attacker.stats.xp + xpGained, actionPoints: attacker.stats.actionPoints - 1 };
       // Simple leveling up
       if (newAttackerStats.xp >= 100 * newAttackerStats.level) {
         newAttackerStats.level += 1;
@@ -219,7 +227,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         newAttackerStats.hp += 10;
       }
 
-      updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats, hasAttacked: true };
+      updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats };
 
       if (isCritical) {
         newActionLog.push(`CRITICAL HIT! ${attackerName} attacked ${defenderName} for ${damage} damage.`);
@@ -261,6 +269,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         if (!state.selectedAircraftId || state.selectedAction !== 'special') return state;
         
         const supporter = state.aircrafts[state.selectedAircraftId];
+        if (supporter.stats.actionPoints <= 0) return state;
 
         if (supporter.type === 'support') {
             const { position, targetId } = action.payload;
@@ -279,10 +288,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                     position: position,
                     stats: {
                         ...aircraftToRevive.stats,
-                        hp: Math.floor(aircraftToRevive.stats.maxHp * 0.25) // Revive with 25% health
+                        hp: Math.floor(aircraftToRevive.stats.maxHp * 0.25), // Revive with 25% health
+                        actionPoints: 0, // Cant act after being revived in the same turn
                     },
-                    hasMoved: true, // Cant move after being revived in the same turn
-                    hasAttacked: true, // Cant attack
                     specialAbilityCooldown: 0,
                     statusEffects: []
                 };
@@ -297,12 +305,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 const newSupporterStats = {
                     ...supporter.stats, 
                     energy: supporter.stats.energy - supporter.stats.specialAbilityCost,
+                    actionPoints: supporter.stats.actionPoints - 1,
                 };
                 
                 const updatedSupporter = {
                     ...supporter, 
                     stats: newSupporterStats, 
-                    hasAttacked: true, 
                     specialAbilityCooldown: 5, // Long cooldown for revive
                     statusEffects: [...supporter.statusEffects.filter(e => e !== 'empowered'), 'empowered']
                 };
@@ -341,7 +349,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         newGrid[to.y][to.x] = null;
         newGrid[from.y][from.x] = aircraft;
 
-        const updatedAircraft = { ...aircraft, position: from, hasMoved: false };
+        const updatedAircraft = { 
+            ...aircraft, 
+            position: from, 
+            stats: {...aircraft.stats, actionPoints: aircraft.stats.actionPoints + 1}
+        };
 
         return {
             ...state,
@@ -361,14 +373,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const logMessage = `Turn ${newTurnNumber} has begun. It's ${nextPlayer}'s turn.`;
 
         Object.values(state.aircrafts).forEach(a => {
-            // Reset hasMoved/hasAttacked & regen energy for the player whose turn is starting
+            // Reset actionPoints & regen energy for the player whose turn is starting
             if (a.owner === nextPlayer) {
                 updatedAircrafts[a.id] = { 
                     ...a, 
-                    hasMoved: false, 
-                    hasAttacked: false,
                     stats: {
                         ...a.stats,
+                        actionPoints: a.stats.maxActionPoints,
                         energy: Math.min(a.stats.maxEnergy, a.stats.energy + 10) // Regenerate 10 energy
                     }
                 };
@@ -430,7 +441,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
             Object.values(state.aircrafts).forEach(a => {
                 if (a.owner === nextPlayer) {
-                    updatedAircrafts[a.id] = { ...a, hasMoved: false, hasAttacked: false, stats: {...a.stats, energy: Math.min(a.stats.maxEnergy, a.stats.energy + 10)}};
+                    updatedAircrafts[a.id] = { ...a, stats: {...a.stats, actionPoints: a.stats.maxActionPoints, energy: Math.min(a.stats.maxEnergy, a.stats.energy + 10)}};
                 }
                  if (a.owner === state.currentPlayer) {
                     updatedAircrafts[a.id] = { ...updatedAircrafts[a.id], specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1), statusEffects: a.statusEffects.filter(e => e !== 'empowered')};

@@ -15,6 +15,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
   const healthPercentage = aircraft ? (aircraft.stats.hp / aircraft.stats.maxHp) * 100 : 0;
   const energyPercentage = aircraft ? (aircraft.stats.energy / aircraft.stats.maxEnergy) * 100 : 0;
   const xpPercentage = aircraft ? (aircraft.stats.xp / (100 * aircraft.stats.level)) * 100 : 0;
+  const apPercentage = aircraft ? (aircraft.stats.actionPoints / aircraft.stats.maxActionPoints) * 100 : 0;
   
   const getHealthColor = () => {
     if (healthPercentage > 70) return "bg-green-500";
@@ -43,6 +44,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
                       <span>{aircraft.stats.hp} / {aircraft.stats.maxHp}</span>
                   </div>
                   <Progress value={healthPercentage} className="h-2" indicatorClassName={getHealthColor()}/>
+              </div>
+              <div>
+                  <div className="flex justify-between">
+                      <span>Action Points</span>
+                      <span>{aircraft.stats.actionPoints} / {aircraft.stats.maxActionPoints}</span>
+                  </div>
+                  <Progress value={apPercentage} className="h-2" indicatorClassName="bg-yellow-400"/>
               </div>
                <div>
                   <div className="flex justify-between">

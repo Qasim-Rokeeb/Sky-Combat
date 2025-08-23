@@ -52,6 +52,7 @@ const Aircraft: React.FC<AircraftProps> = ({
 
 
   const healthPercentage = (aircraft.stats.hp / aircraft.stats.maxHp) * 100;
+  const apPercentage = (aircraft.stats.actionPoints / aircraft.stats.maxActionPoints) * 100;
   const isLowHp = healthPercentage <= 30;
 
   const getHealthColor = () => {
@@ -83,6 +84,7 @@ const Aircraft: React.FC<AircraftProps> = ({
               isDestroyed && "animate-destroy",
               isLowHp && !isDestroyed && "animate-low-hp-pulse",
               aircraft.statusEffects.includes('stunned') && "opacity-60",
+              aircraft.stats.actionPoints === 0 && 'opacity-50',
               aircraft.statusEffects.includes('empowered') && "animate-empowered-glow",
             )}
             data-owner={aircraft.owner}
@@ -143,7 +145,12 @@ const Aircraft: React.FC<AircraftProps> = ({
             >
               {aircraftIcons[aircraft.type]}
             </div>
-            <div className="absolute bottom-0 w-full px-1">
+            <div className="absolute bottom-0 w-full px-1 space-y-0.5">
+              <Progress
+                value={apPercentage}
+                className="h-1 bg-secondary"
+                indicatorClassName="bg-yellow-400"
+              />
               <Progress
                 value={healthPercentage}
                 className="h-1 bg-secondary"
@@ -163,6 +170,10 @@ const Aircraft: React.FC<AircraftProps> = ({
                 <div className="flex justify-between">
                     <span>HP:</span>
                     <span>{aircraft.stats.hp} / {aircraft.stats.maxHp}</span>
+                </div>
+                 <div className="flex justify-between">
+                    <span>AP:</span>
+                    <span>{aircraft.stats.actionPoints} / {aircraft.stats.maxActionPoints}</span>
                 </div>
                 <div className="flex justify-between">
                     <span>Attack:</span>
