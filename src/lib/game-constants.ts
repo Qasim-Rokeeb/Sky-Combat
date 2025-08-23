@@ -3,8 +3,8 @@ import type { AircraftStats } from "@/types/game";
 export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<AircraftStats, 'hp' | 'xp' | 'level'>> = {
   fighter: {
     maxHp: 100,
-    attack: 35,
-    defense: 15,
+    attack: 30,
+    defense: 20,
     range: 3,
     speed: 4,
   },
