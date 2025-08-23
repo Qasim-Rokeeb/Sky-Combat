@@ -10,8 +10,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { RotateCcw } from "lucide-react";
+import { Home } from "lucide-react";
 import type { Player } from "@/types/game";
+import { Button } from "../ui/button";
+import { RotateCcw } from "lucide-react";
+import Link from "next/link";
 
 interface GameOverDialogProps {
   isOpen: boolean;
@@ -24,7 +27,7 @@ const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset
     <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl text-center">
+          <AlertDialogTitle className="text-2xl text-center font-headline">
             {winner === "player" ? "Victory!" : "Defeat!"}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center">
@@ -33,10 +36,16 @@ const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset
               : "All your aircraft have been destroyed. Better luck next time."}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="gap-2">
+          <Button variant="outline" asChild className="w-full">
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Main Menu
+            </Link>
+          </Button>
           <AlertDialogAction onClick={onReset} className="w-full">
             <RotateCcw className="mr-2 h-4 w-4" />
-            Play Again
+            Replay
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
