@@ -133,7 +133,11 @@ export default {
         'destroy': {
             '0%': { transform: 'scale(1)', opacity: '1' },
             '100%': { transform: 'scale(0.5)', opacity: '0' },
-        }
+        },
+        'low-hp-pulse': {
+          '0%, 100%': { boxShadow: 'inset 0 0 0 2px hsl(var(--destructive))' },
+          '50%': { boxShadow: 'inset 0 0 0 2px hsl(var(--destructive) / 0.5)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -148,6 +152,7 @@ export default {
         'spin-slow': 'spin-slow 1.5s linear infinite',
         'heal': 'heal 0.7s ease-in-out',
         'destroy': 'destroy 0.3s ease-in-out forwards',
+        'low-hp-pulse': 'low-hp-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

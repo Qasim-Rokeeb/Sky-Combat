@@ -42,6 +42,7 @@ const Aircraft: React.FC<AircraftProps> = ({
 
 
   const healthPercentage = (aircraft.stats.hp / aircraft.stats.maxHp) * 100;
+  const isLowHp = healthPercentage <= 30;
 
   const getHealthColor = () => {
     if (healthPercentage > 70) return "bg-green-500";
@@ -63,7 +64,8 @@ const Aircraft: React.FC<AircraftProps> = ({
               isDefender && animation?.type === 'attack' && "animate-shake",
               isAttacker && "animate-flash",
               isDefender && animation?.type === 'heal' && 'animate-heal',
-              isDestroyed && "animate-destroy"
+              isDestroyed && "animate-destroy",
+              isLowHp && !isDestroyed && "animate-low-hp-pulse"
             )}
             data-owner={aircraft.owner}
           >
