@@ -27,6 +27,43 @@ const Battlefield: React.FC<BattlefieldProps> = ({
   animation,
   isPlayerTurn,
 }) => {
+  // Memoize enemy positions to avoid recalculating on every render
+  const enemyPositions = React.useMemo(() => {
+    const playerEnemies: Aircraft[] = [];
+    const opponentEnemies: Aircraft[] = [];
+    grid.flat().forEach(cell => {
+      if (cell) {
+        if (cell.owner === 'player') opponentEnemies.push(cell);
+        else playerEnemies.push(cell);
+      }
+    });
+    return { player: playerEnemies, opponent: opponentEnemies };
+  }, [grid]);
+
+  const getIsFlipped = (aircraft: Aircraft) => {
+    const enemies = aircraft.owner === 'player' ? enemyPositions.player : enemyPositions.opponent;
+    if (enemies.length === 0) return false;
+
+    let closestEnemy: Aircraft | null = null;
+    let minDistance = Infinity;
+
+    for (const enemy of enemies) {
+      const distance = Math.abs(aircraft.position.x - enemy.position.x) + Math.abs(aircraft.position.y - enemy.position.y);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestEnemy = enemy;
+      }
+    }
+
+    if (closestEnemy) {
+      // Flip if the closest enemy is to the left. Default sprite faces right.
+      return closestEnemy.position.x < aircraft.position.x;
+    }
+    
+    return false;
+  };
+
+
   return (
     <div className="aspect-square w-full max-w-[calc(100vh-4rem)] bg-card/50 backdrop-blur-sm rounded-lg p-2 shadow-inner border border-primary/20">
       <div
@@ -54,13 +91,14 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                 )}
                 onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
               >
-                {grid[y][x] && (
+                {aircraftOnCell && (
                   <AircraftComponent
-                    aircraft={grid[y][x]!}
-                    isSelected={grid[y][x]!.id === selectedAircraftId}
+                    aircraft={aircraftOnCell}
+                    isSelected={aircraftOnCell.id === selectedAircraftId}
                     isAttackable={isAttackable}
                     isSupportable={isSupportable}
                     animation={animation}
+                    isFlipped={getIsFlipped(aircraftOnCell)}
                     onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
                   />
                 )}

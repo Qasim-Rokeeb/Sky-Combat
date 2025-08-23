@@ -19,6 +19,7 @@ interface AircraftProps {
   isAttackable: boolean;
   isSupportable: boolean;
   animation: GameAnimation | null;
+  isFlipped: boolean;
   onClick: () => void;
 }
 
@@ -40,6 +41,7 @@ const Aircraft: React.FC<AircraftProps> = ({
   isAttackable,
   isSupportable,
   animation,
+  isFlipped,
   onClick
 }) => {
   const isAttacker =
@@ -115,7 +117,8 @@ const Aircraft: React.FC<AircraftProps> = ({
             <div
               className={cn(
                 "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",
-                "group-hover:scale-110"
+                "group-hover:scale-110",
+                isFlipped && "scale-x-[-1]"
               )}
             >
               {aircraftIcons[aircraft.type]}
