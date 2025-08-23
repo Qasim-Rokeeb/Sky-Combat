@@ -118,7 +118,8 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="container mx-auto px-4 py-6 text-center text-muted-foreground">
+      <footer className="container mx-auto px-4 py-8 text-center text-muted-foreground border-t border-primary/20">
+        <p className="mb-2">A turn-based aerial strategy game built with Next.js and Genkit.</p>
         <p>&copy; 2025 Sky Combat. All rights reserved.</p>
       </footer>
     </div>
