@@ -195,10 +195,14 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       updatedAircrafts[attacker.id] = { ...attacker, stats: {...attacker.stats, actionPoints: attacker.stats.actionPoints - 1} };
 
-      // Dodge check
-      const didDodge = Math.random() < defender.stats.dodgeChance;
+      // Dodge check with evasion calculation
+      const speedDifference = defender.stats.speed - attacker.stats.speed;
+      const levelDifference = defender.stats.level - attacker.stats.level;
+      const effectiveDodgeChance = defender.stats.dodgeChance + (speedDifference * 0.01) + (levelDifference * 0.01);
+      
+      const didDodge = Math.random() < effectiveDodgeChance;
       if (didDodge) {
-          newActionLog.push(`${defenderName} dodged the attack from ${attackerName}!`);
+          newActionLog.push(`${defenderName} dodged the attack from ${attackerName}! (Evasion: ${Math.round(effectiveDodgeChance * 100)}%)`);
           return {
             ...state,
             aircrafts: updatedAircrafts,

@@ -155,6 +155,10 @@ export default {
             '0%': { transform: 'scale(0)', opacity: '0' },
             '50%': { transform: 'scale(3) rotate(360deg)', opacity: '1' },
             '100%': { transform: 'scale(2.5)', opacity: '0' },
+        },
+        'stun': {
+            '0%, 100%': { opacity: '1' },
+            '50%': { opacity: '0.4' },
         }
       },
       animation: {
@@ -175,6 +179,7 @@ export default {
         'low-hp-pulse': 'low-hp-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'dodge': 'dodge 0.3s ease-in-out',
         'final-explosion': 'final-explosion 0.7s ease-out forwards',
+        'stun': 'stun 0.5s ease-in-out infinite',
       },
     },
   },
