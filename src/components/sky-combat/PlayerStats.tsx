@@ -13,6 +13,7 @@ interface PlayerStatsProps {
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
   const healthPercentage = aircraft ? (aircraft.stats.hp / aircraft.stats.maxHp) * 100 : 0;
+  const xpPercentage = aircraft ? (aircraft.stats.xp / (100 * aircraft.stats.level)) * 100 : 0;
   
   const getHealthColor = () => {
     if (healthPercentage > 70) return "bg-green-500";
@@ -26,9 +27,12 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
       {aircraft ? (
         <Card className="bg-secondary/50 border-primary/20">
           <CardHeader className="p-4">
-            <CardTitle className="text-lg capitalize flex items-center gap-2 font-headline">
-              {aircraft.type}
-              <span className="text-sm font-normal text-muted-foreground">({aircraft.owner})</span>
+            <CardTitle className="text-lg capitalize flex items-center justify-between font-headline">
+              <div className="flex items-center gap-2">
+                {aircraft.type}
+                <span className="text-sm font-normal text-muted-foreground">({aircraft.owner})</span>
+              </div>
+              <span>Lvl. {aircraft.stats.level}</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-sm space-y-2">
@@ -39,6 +43,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
                   </div>
                   <Progress value={healthPercentage} className="h-2" indicatorClassName={getHealthColor()}/>
               </div>
+              <div>
+                  <div className="flex justify-between">
+                      <span>XP</span>
+                      <span>{aircraft.stats.xp} / {100 * aircraft.stats.level}</span>
+                  </div>
+                  <Progress value={xpPercentage} className="h-2" indicatorClassName="bg-blue-400"/>
+              </div>
               <div className="flex justify-between"><span>Attack:</span> <span>{aircraft.stats.attack}</span></div>
               <div className="flex justify-between"><span>Defense:</span> <span>{aircraft.stats.defense}</span></div>
               <div className="flex justify-between"><span>Range:</span> <span>{aircraft.stats.range}</span></div>
@@ -46,7 +57,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-secondary/50 border-primary/20 flex items-center justify-center h-48">
+        <Card className="bg-secondary/50 border-primary/20 flex items-center justify-center h-56">
           <CardContent className="p-4 text-center text-muted-foreground">
             <p>Select an aircraft to view its stats.</p>
           </CardContent>

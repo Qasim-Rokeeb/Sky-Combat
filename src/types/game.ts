@@ -8,6 +8,8 @@ export interface AircraftStats {
   defense: number;
   range: number;
   speed: number;
+  xp: number;
+  level: number;
 }
 
 export type AircraftType = "fighter" | "bomber" | "support";

@@ -16,10 +16,16 @@ export const createInitialState = (width: number, height: number): GameState => 
   ];
 
   playerAircraft.forEach((a) => {
+    const stats = AIRCRAFT_STATS[a.type];
     const aircraft: Aircraft = {
       ...a,
       owner: "player",
-      stats: { ...AIRCRAFT_STATS[a.type] },
+      stats: { 
+        ...stats,
+        hp: stats.maxHp,
+        xp: 0,
+        level: 1,
+      },
       hasMoved: false,
       hasAttacked: false,
     };
@@ -35,10 +41,16 @@ export const createInitialState = (width: number, height: number): GameState => 
   ];
 
   opponentAircraft.forEach((a) => {
+    const stats = AIRCRAFT_STATS[a.type];
     const aircraft: Aircraft = {
       ...a,
       owner: "opponent",
-      stats: { ...AIRCRAFT_STATS[a.type] },
+      stats: { 
+        ...stats,
+        hp: stats.maxHp,
+        xp: 0,
+        level: 1,
+       },
       hasMoved: false,
       hasAttacked: false,
     };
@@ -101,7 +113,7 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
         }
 
         if (closestTarget) {
-            const dx = closestTarget.position.x - aircraft.position.x;
+            const dx = closestTarget.position.x - closestTarget.position.x;
             const dy = closestTarget.position.y - aircraft.position.y;
             let bestMove: {x: number, y: number} | null = null;
             let bestMoveDistance = Infinity;

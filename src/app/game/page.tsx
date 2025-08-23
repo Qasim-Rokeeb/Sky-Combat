@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import PlayerStats from "@/components/sky-combat/PlayerStats";
 import MiniMap from "@/components/sky-combat/MiniMap";
 import { cn } from "@/lib/utils";
+import Scoreboard from "@/components/sky-combat/Scoreboard";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -124,9 +125,20 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       const damage = Math.max(1, attacker.stats.attack - defender.stats.defense);
       const newHp = defender.stats.hp - damage;
+      const xpGained = damage; // Gain XP equal to damage dealt
 
       const updatedAircrafts = { ...state.aircrafts };
-      updatedAircrafts[attacker.id] = { ...attacker, hasAttacked: true };
+      const newAttackerStats = { ...attacker.stats, xp: attacker.stats.xp + xpGained };
+      // Simple leveling up
+      if (newAttackerStats.xp >= 100 * newAttackerStats.level) {
+        newAttackerStats.level += 1;
+        newAttackerStats.xp = 0;
+        newAttackerStats.attack += 5;
+        newAttackerStats.maxHp += 10;
+        newAttackerStats.hp += 10;
+      }
+
+      updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats, hasAttacked: true };
 
       let newGrid = state.grid.map(row => [...row]);
       if (newHp <= 0) {
@@ -300,6 +312,7 @@ export default function SkyCombatPage() {
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <PlayerStats aircraft={selectedAircraft} />
         <MiniMap gameState={state} />
+        <Scoreboard aircrafts={Object.values(state.aircrafts)} />
       </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
