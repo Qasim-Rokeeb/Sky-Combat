@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Send, Bomb, Shield, Zap, ZapOff, ShieldCheck } from "lucide-react";
+import { Send, Bomb, Shield, Zap, ZapOff, ShieldCheck, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Aircraft as AircraftType, GameAnimation, StatusEffect } from "@/types/game";
 import { Progress } from "@/components/ui/progress";
@@ -88,7 +88,8 @@ const Aircraft: React.FC<AircraftProps> = ({
             onClick={handleWrapperClick}
           >
             {isDefender && animation?.isCritical && (
-                <div className="absolute -top-10 text-yellow-400 font-black text-xl animate-critical-popup">
+                <div className="absolute -top-10 text-yellow-400 font-black text-xl animate-critical-popup flex items-center gap-1">
+                    <Sparkles className="w-6 h-6" />
                     CRITICAL!
                 </div>
             )}
