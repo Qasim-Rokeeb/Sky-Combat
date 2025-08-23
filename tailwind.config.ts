@@ -124,6 +124,10 @@ export default {
         'spin-slow': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        'destroy': {
+            '0%': { transform: 'scale(1)', opacity: '1' },
+            '100%': { transform: 'scale(0.5)', opacity: '0' },
         }
       },
       animation: {
@@ -137,6 +141,7 @@ export default {
         'victory-display': 'victory-display 1.5s ease-out forwards',
         'defeat-display': 'defeat-display 1.5s ease-out forwards',
         'spin-slow': 'spin-slow 1.5s linear infinite',
+        'destroy': 'destroy 0.3s ease-in-out forwards',
       },
     },
   },

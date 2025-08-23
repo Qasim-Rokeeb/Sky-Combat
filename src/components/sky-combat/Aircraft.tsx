@@ -38,6 +38,8 @@ const Aircraft: React.FC<AircraftProps> = ({
     (animation?.type === "attack" || animation?.type === 'heal') && animation.attackerId === aircraft.id;
   const isDefender =
     (animation?.type === "attack" || animation?.type === 'heal') && animation.defenderId === aircraft.id;
+  const isDestroyed = aircraft.stats.hp <= 0;
+
 
   const healthPercentage = (aircraft.stats.hp / aircraft.stats.maxHp) * 100;
 
@@ -60,7 +62,8 @@ const Aircraft: React.FC<AircraftProps> = ({
               isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
               isDefender && animation?.type === 'attack' && "animate-shake",
               isAttacker && "animate-flash",
-              isDefender && animation?.type === 'heal' && 'animate-heal'
+              isDefender && animation?.type === 'heal' && 'animate-heal',
+              isDestroyed && "animate-destroy"
             )}
             data-owner={aircraft.owner}
           >

@@ -129,6 +129,10 @@ export default {
             '0%': {boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.7)',},
             '70%': {boxShadow: '0 0 0 10px rgba(74, 222, 128, 0)',},
             '100%': {boxShadow: '0 0 0 0 rgba(74, 222, 128, 0)',},
+        },
+        'destroy': {
+            '0%': { transform: 'scale(1)', opacity: '1' },
+            '100%': { transform: 'scale(0.5)', opacity: '0' },
         }
       },
       animation: {
@@ -143,6 +147,7 @@ export default {
         'defeat-display': 'defeat-display 1.s ease-out forwards',
         'spin-slow': 'spin-slow 1.5s linear infinite',
         'heal': 'heal 0.7s ease-in-out',
+        'destroy': 'destroy 0.3s ease-in-out forwards',
       },
     },
   },
