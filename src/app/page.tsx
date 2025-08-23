@@ -7,11 +7,11 @@ import { Gamepad2, Rocket, Zap } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background to-primary/20 text-foreground">
-      <header className="container mx-auto px-4 py-8 text-center bg-primary/10 rounded-b-3xl shadow-lg">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground">
+      <header className="container mx-auto px-4 py-8 text-center">
         <div className="flex justify-center items-center gap-4 mb-4">
           <Rocket className="w-12 h-12 text-primary" />
-          <h1 className="text-5xl md:text-6xl font-bold font-headline tracking-widest text-primary animate-glow">
+          <h1 className="text-5xl md:text-6xl font-bold font-headline tracking-widest text-primary-foreground animate-glow">
             Sky Combat
           </h1>
           <Rocket className="w-12 h-12 text-primary" />
@@ -46,7 +46,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-card/50">
+            <Card className="bg-card/50 backdrop-blur-sm">
               <CardHeader className="items-center text-center">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
                   <Rocket className="w-8 h-8 text-primary" />
@@ -61,7 +61,7 @@ export default function LandingPage() {
                 battlefield.
               </CardContent>
             </Card>
-            <Card className="bg-card/50">
+            <Card className="bg-card/50 backdrop-blur-sm">
               <CardHeader className="items-center text-center">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
                   <Zap className="w-8 h-8 text-primary" />
@@ -76,7 +76,7 @@ export default function LandingPage() {
                 abilities.
               </CardContent>
             </Card>
-            <Card className="bg-card/50">
+            <Card className="bg-card/50 backdrop-blur-sm">
               <CardHeader className="items-center text-center">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
                   <Gamepad2 className="w-8 h-8 text-primary" />

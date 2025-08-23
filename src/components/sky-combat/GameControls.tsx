@@ -57,7 +57,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary animate-glow">Sky Combat</h1>
+        <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary-foreground animate-glow">Sky Combat</h1>
         <Link href="/">
             <Button variant="outline" size="icon">
                 <Home />

@@ -244,7 +244,7 @@ export default function SkyCombatPage() {
   }, [state.animation]);
 
   return (
-    <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-br from-background via-background to-primary/20 text-foreground p-4 gap-4 overflow-hidden">
+    <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
           grid={state.grid}
@@ -256,7 +256,7 @@ export default function SkyCombatPage() {
           isPlayerTurn={state.currentPlayer === 'player'}
         />
       </div>
-      <aside className="w-full lg:w-96 bg-card text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <aside className="w-full lg:w-96 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <GameControls
           gameState={state}
           onActionSelect={handleActionSelect}
