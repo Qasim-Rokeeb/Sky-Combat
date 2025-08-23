@@ -29,13 +29,14 @@ export type Grid = GridCell[][];
 
 export type GamePhase = "playing" | "gameOver";
 
-export type ActionType = "move" | "attack" | "none";
+export type ActionType = "move" | "attack" | "support" | "none";
 
 export interface GameAnimation {
-  type: 'attack';
+  type: 'attack' | 'heal';
   attackerId: string;
   defenderId: string;
-  damage: number;
+  damage?: number;
+  healAmount?: number;
 }
 
 export interface GameState {
@@ -48,6 +49,7 @@ export interface GameState {
   selectedAction: ActionType;
   actionHighlights: { x: number; y: number }[];
   attackableAircraftIds: string[];
+  supportableAircraftIds: string[];
   animation: GameAnimation | null;
   turnNumber: number;
 }

@@ -36,11 +36,12 @@ type GameAction =
   | { type: "SELECT_ACTION"; payload: { action: ActionType } }
   | { type: "MOVE_AIRCRAFT"; payload: { x: number; y: number } }
   | { type: "ATTACK_AIRCRAFT"; payload: { targetId: string } }
+  | { type: "SUPPORT_AIRCRAFT"; payload: { targetId: string } }
   | { type: "END_TURN" }
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
   | { type: "RESET_GAME" }
-  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage: number } }
+  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage?: number, healAmount?: number } }
   | { type: "CLEAR_ANIMATION" };
 
 const GRID_WIDTH = 12;
@@ -59,6 +60,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         actionHighlights: [],
         attackableAircraftIds: [],
+        supportableAircraftIds: [],
       };
     }
 
@@ -80,7 +82,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             }
           }
         }
-        return { ...state, selectedAction: "move", actionHighlights: highlights, attackableAircraftIds: [] };
+        return { ...state, selectedAction: "move", actionHighlights: highlights, attackableAircraftIds: [], supportableAircraftIds: [] };
       }
 
       if (action === "attack" && !aircraft.hasAttacked) {
@@ -89,13 +91,25 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
           return distance <= aircraft.stats.range;
         }).map(a => a.id);
-        return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable };
+        return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable, supportableAircraftIds: [] };
       }
+      
+      if (action === "support" && !aircraft.hasAttacked && aircraft.type === 'support') {
+          const supportable = Object.values(state.aircrafts).filter(target => {
+              if(target.owner !== state.currentPlayer) return false;
+              if(target.stats.hp === target.stats.maxHp) return false; // Already at max hp
+              const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
+              return distance <= aircraft.stats.range;
+          }).map(a => a.id);
+          return {...state, selectedAction: 'support', actionHighlights: [], attackableAircraftIds: [], supportableAircraftIds: supportable};
+      }
+
       return {
         ...state,
         selectedAction: "none",
         actionHighlights: [],
-        attackableAircraftIds: []
+        attackableAircraftIds: [],
+        supportableAircraftIds: []
       };
     }
 
@@ -156,8 +170,40 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         grid: newGrid,
         selectedAction: "none",
         attackableAircraftIds: [],
+        supportableAircraftIds: [],
         animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage },
       };
+    }
+    
+    case "SUPPORT_AIRCRAFT": {
+        if (!state.selectedAircraftId || state.selectedAction !== 'support') return state;
+        const { targetId } = action.payload;
+        const supporter = state.aircrafts[state.selectedAircraftId];
+        const target = state.aircrafts[targetId];
+        
+        const healAmount = supporter.stats.attack; // Use attack stat for healing amount
+        const newHp = Math.min(target.stats.maxHp, target.stats.hp + healAmount);
+        const xpGained = healAmount;
+
+        const updatedAircrafts = {...state.aircrafts};
+        const newSupporterStats = {...supporter.stats, xp: supporter.stats.xp + xpGained};
+        if(newSupporterStats.xp >= 100 * newSupporterStats.level){
+            newSupporterStats.level += 1;
+            newSupporterStats.xp = 0;
+            newSupporterStats.attack += 3;
+            newSupporterStats.maxHp += 5;
+        }
+
+        updatedAircrafts[supporter.id] = {...supporter, stats: newSupporterStats, hasAttacked: true};
+        updatedAircrafts[target.id] = {...target, stats: {...target.stats, hp: newHp}};
+        
+        return {
+            ...state,
+            aircrafts: updatedAircrafts,
+            selectedAction: 'none',
+            supportableAircraftIds: [],
+            animation: {type: 'heal', attackerId: supporter.id, defenderId: target.id, healAmount}
+        }
     }
     
     case "END_TURN": {
@@ -176,6 +222,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             selectedAction: 'none',
             actionHighlights: [],
             attackableAircraftIds: [],
+            supportableAircraftIds: [],
             aircrafts: updatedAircrafts,
             turnNumber: nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber,
         };
@@ -188,7 +235,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return createInitialState(GRID_WIDTH, GRID_HEIGHT);
     
     case "SHOW_ANIMATION":
-        return {...state, animation: {type: 'attack', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId, damage: action.payload.damage}};
+        return {...state, animation: {type: action.payload.damage ? 'attack' : 'heal', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId, damage: action.payload.damage, healAmount: action.payload.healAmount}};
 
     case "CLEAR_ANIMATION":
         return {...state, animation: null};
@@ -239,6 +286,10 @@ export default function SkyCombatPage() {
     } else if (state.selectedAircraftId && state.selectedAction === "attack" && aircraft && aircraft.owner !== state.currentPlayer) {
         if (state.attackableAircraftIds.includes(aircraft.id)) {
             dispatch({ type: "ATTACK_AIRCRAFT", payload: { targetId: aircraft.id } });
+        }
+    } else if (state.selectedAircraftId && state.selectedAction === 'support' && aircraft && aircraft.owner === state.currentPlayer) {
+        if (state.supportableAircraftIds.includes(aircraft.id)){
+            dispatch({type: "SUPPORT_AIRCRAFT", payload: {targetId: aircraft.id}});
         }
     }
   };
@@ -339,6 +390,7 @@ export default function SkyCombatPage() {
           selectedAircraftId={state.selectedAircraftId}
           actionHighlights={state.actionHighlights}
           attackableAircraftIds={state.attackableAircraftIds}
+          supportableAircraftIds={state.supportableAircraftIds}
           animation={state.animation}
           isPlayerTurn={state.currentPlayer === 'player'}
         />

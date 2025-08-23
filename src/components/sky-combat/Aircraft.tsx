@@ -16,6 +16,7 @@ interface AircraftProps {
   aircraft: AircraftType;
   isSelected: boolean;
   isAttackable: boolean;
+  isSupportable: boolean;
   animation: GameAnimation | null;
 }
 
@@ -29,12 +30,13 @@ const Aircraft: React.FC<AircraftProps> = ({
   aircraft,
   isSelected,
   isAttackable,
+  isSupportable,
   animation,
 }) => {
   const isAttacker =
-    animation?.type === "attack" && animation.attackerId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal') && animation.attackerId === aircraft.id;
   const isDefender =
-    animation?.type === "attack" && animation.defenderId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal') && animation.defenderId === aircraft.id;
 
   const healthPercentage = (aircraft.stats.hp / aircraft.stats.maxHp) * 100;
 
@@ -53,14 +55,21 @@ const Aircraft: React.FC<AircraftProps> = ({
             aircraft.owner === "player" ? "text-primary" : "text-destructive",
             isSelected && "bg-accent/30 scale-110 animate-glow animate-click-highlight",
             isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
-            isDefender && "animate-shake",
-            isAttacker && "animate-flash"
+            isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
+            isDefender && animation?.type === 'attack' && "animate-shake",
+            isAttacker && "animate-flash",
+            isDefender && animation?.type === 'heal' && 'animate-pulse'
           )}
           data-owner={aircraft.owner}
         >
           {isDefender && animation?.damage && (
             <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">
               -{animation.damage}
+            </div>
+          )}
+          {isDefender && animation?.healAmount && (
+            <div className="absolute -top-6 text-green-400 font-bold text-lg animate-damage-popup">
+              +{animation.healAmount}
             </div>
           )}
           <div

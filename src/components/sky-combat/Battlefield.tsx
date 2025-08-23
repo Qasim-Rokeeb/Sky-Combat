@@ -11,6 +11,7 @@ interface BattlefieldProps {
   selectedAircraftId: string | null;
   actionHighlights: { x: number; y: number }[];
   attackableAircraftIds: string[];
+  supportableAircraftIds: string[];
   animation: GameAnimation | null;
   isPlayerTurn: boolean;
 }
@@ -21,6 +22,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
   selectedAircraftId,
   actionHighlights,
   attackableAircraftIds,
+  supportableAircraftIds,
   animation,
   isPlayerTurn,
 }) => {
@@ -38,6 +40,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
             const isHighlighted = actionHighlights.some(p => p.x === x && p.y === y);
             const aircraftOnCell = grid[y][x];
             const isAttackable = aircraftOnCell ? attackableAircraftIds.includes(aircraftOnCell.id) : false;
+            const isSupportable = aircraftOnCell ? supportableAircraftIds.includes(aircraftOnCell.id) : false;
 
             return (
               <div
@@ -55,6 +58,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                     aircraft={grid[y][x]!}
                     isSelected={grid[y][x]!.id === selectedAircraftId}
                     isAttackable={isAttackable}
+                    isSupportable={isSupportable}
                     animation={animation}
                   />
                 )}
