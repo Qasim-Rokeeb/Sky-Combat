@@ -71,17 +71,31 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       if (action === "move" && !aircraft.hasMoved) {
         const highlights = [];
-        for (let i = -aircraft.stats.speed; i <= aircraft.stats.speed; i++) {
-          for (let j = -aircraft.stats.speed; j <= aircraft.stats.speed; j++) {
-            if (Math.abs(i) + Math.abs(j) <= aircraft.stats.speed && Math.abs(i) + Math.abs(j) !== 0) {
-              const newX = aircraft.position.x + i;
-              const newY = aircraft.position.y + j;
-              if (newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT && !state.grid[newY][newX]) {
-                highlights.push({ x: newX, y: newY });
-              }
+        const queue: {x: number, y: number, dist: number}[] = [{x: aircraft.position.x, y: aircraft.position.y, dist: 0}];
+        const visited = new Set<string>([`${aircraft.position.x},${aircraft.position.y}`]);
+
+        while(queue.length > 0){
+            const {x, y, dist} = queue.shift()!;
+
+            if(dist > aircraft.stats.speed) continue;
+
+            if(dist > 0 && !state.grid[y][x]){
+                highlights.push({x, y});
             }
-          }
+
+            const neighbors = [{dx: 0, dy: 1}, {dx: 0, dy: -1}, {dx: 1, dy: 0}, {dx: -1, dy: 0}];
+            for(const {dx, dy} of neighbors){
+                const newX = x + dx;
+                const newY = y + dy;
+                const key = `${newX},${newY}`;
+
+                if(newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT && !visited.has(key) && !state.grid[newY][newX]){
+                    visited.add(key);
+                    queue.push({x: newX, y: newY, dist: dist + 1});
+                }
+            }
         }
+        
         return { ...state, selectedAction: "move", actionHighlights: highlights, attackableAircraftIds: [], supportableAircraftIds: [] };
       }
 
@@ -426,3 +440,5 @@ export default function SkyCombatPage() {
     </main>
   );
 }
+
+    
