@@ -10,7 +10,9 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     speed: 4,
     maxEnergy: 100,
     specialAbilityCost: 50,
-    specialAbilityDescription: "A powerful, precise strike against a single target. High damage, but requires careful positioning."
+    specialAbilityDescription: "A powerful, precise strike against a single target. High damage, but requires careful positioning.",
+    critChance: 0.15, // 15%
+    critDamage: 1.5, // 150% damage
   },
   bomber: {
     maxHp: 120,
@@ -20,7 +22,9 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     speed: 3,
     maxEnergy: 100,
     specialAbilityCost: 75,
-    specialAbilityDescription: "Drops a payload of explosives, damaging all units in a target area."
+    specialAbilityDescription: "Drops a payload of explosives, damaging all units in a target area.",
+    critChance: 0.05, // 5%
+    critDamage: 1.5, // 150% damage
   },
   support: {
     maxHp: 80,
@@ -30,6 +34,8 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     speed: 3,
     maxEnergy: 120,
     specialAbilityCost: 40,
-    specialAbilityDescription: "Deploys a repair drone to a friendly unit, restoring a portion of its health."
+    specialAbilityDescription: "Deploys a repair drone to a friendly unit, restoring a portion of its health.",
+    critChance: 0.10, // 10%
+    critDamage: 1.5, // 150% damage
   },
 };

@@ -71,7 +71,7 @@ const Aircraft: React.FC<AircraftProps> = ({
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group cursor-pointer hover:bg-accent/20",
+              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group cursor-pointer hover:outline hover:outline-2 hover:outline-accent",
               aircraft.owner === "player" ? "text-primary" : "text-destructive",
               isSelected && "bg-accent/30 scale-110 animate-glow",
               isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
@@ -87,6 +87,11 @@ const Aircraft: React.FC<AircraftProps> = ({
             data-owner={aircraft.owner}
             onClick={handleWrapperClick}
           >
+            {isDefender && animation?.isCritical && (
+                <div className="absolute -top-10 text-yellow-400 font-black text-xl animate-critical-popup">
+                    CRITICAL!
+                </div>
+            )}
             {isDefender && animation?.damage && (
               <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">
                 -{animation.damage}
@@ -159,6 +164,10 @@ const Aircraft: React.FC<AircraftProps> = ({
                 <div className="flex justify-between">
                     <span>Speed:</span>
                     <span>{aircraft.stats.speed}</span>
+                </div>
+                 <div className="flex justify-between">
+                    <span>Crit Chance:</span>
+                    <span>{Math.round(aircraft.stats.critChance * 100)}%</span>
                 </div>
             </div>
         </TooltipContent>

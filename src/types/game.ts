@@ -16,6 +16,8 @@ export interface AircraftStats {
   maxEnergy: number;
   specialAbilityCost: number;
   specialAbilityDescription: string;
+  critChance: number;
+  critDamage: number;
 }
 
 export type AircraftType = "fighter" | "bomber" | "support";
@@ -45,6 +47,7 @@ export interface GameAnimation {
   defenderId: string;
   damage?: number;
   healAmount?: number;
+  isCritical?: boolean;
 }
 
 export interface LastMove {

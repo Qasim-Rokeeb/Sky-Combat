@@ -114,6 +114,11 @@ export default {
           '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
           '100%': { transform: 'translateY(-1.5rem) scale(1.1)', opacity: '0' },
         },
+        'critical-popup': {
+            '0%': { transform: 'scale(0.5)', opacity: '0' },
+            '50%': { transform: 'scale(1.2)', opacity: '1' },
+            '100%': { transform: 'scale(1)', opacity: '1' },
+        },
         'victory-display': {
           '0%': { transform: 'scale(0.3) rotate(-15deg)', opacity: '0' },
           '50%': { transform: 'scale(1.1) rotate(5deg)', opacity: '1' },
@@ -152,6 +157,7 @@ export default {
         'empowered-glow': 'empowered-glow 1s ease-in-out infinite',
         'clouds': 'clouds 120s linear infinite',
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
+        'critical-popup': 'critical-popup 0.5s ease-out forwards',
         'victory-display': 'victory-display 1.5s ease-out forwards',
         'defeat-display': 'defeat-display 1.5s ease-out forwards',
         'spin-slow': 'spin-slow 1.5s linear infinite',

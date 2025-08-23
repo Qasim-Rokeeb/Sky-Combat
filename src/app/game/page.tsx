@@ -169,7 +169,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const attacker = state.aircrafts[state.selectedAircraftId];
       const defender = state.aircrafts[targetId];
 
-      const damage = Math.max(1, attacker.stats.attack - defender.stats.defense);
+      const isCritical = Math.random() < attacker.stats.critChance;
+      let baseDamage = Math.max(1, attacker.stats.attack - defender.stats.defense);
+      const damage = isCritical ? Math.floor(baseDamage * attacker.stats.critDamage) : baseDamage;
+
       const newHp = defender.stats.hp - damage;
       const xpGained = damage; // Gain XP equal to damage dealt
 
@@ -189,7 +192,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const newActionLog = [...state.actionLog];
       const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
       const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
-      newActionLog.push(`${attackerName} attacked ${defenderName} for ${damage} damage.`);
+      if (isCritical) {
+        newActionLog.push(`CRITICAL HIT! ${attackerName} attacked ${defenderName} for ${damage} damage.`);
+      } else {
+        newActionLog.push(`${attackerName} attacked ${defenderName} for ${damage} damage.`);
+      }
 
       let newGrid = state.grid.map(row => [...row]);
       if (newHp <= 0) {
@@ -207,7 +214,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         attackableAircraftIds: [],
         supportableAircraftIds: [],
-        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage },
+        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage, isCritical },
         lastMove: null,
         actionLog: newActionLog,
       };

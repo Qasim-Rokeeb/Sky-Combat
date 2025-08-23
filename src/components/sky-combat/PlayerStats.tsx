@@ -62,6 +62,8 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
               <div className="flex justify-between"><span>Defense:</span> <span>{aircraft.stats.defense}</span></div>
               <div className="flex justify-between"><span>Range:</span> <span>{aircraft.stats.range}</span></div>
               <div className="flex justify-between"><span>Speed:</span> <span>{aircraft.stats.speed}</span></div>
+              <div className="flex justify-between"><span>Crit Chance:</span> <span>{Math.round(aircraft.stats.critChance * 100)}%</span></div>
+              <div className="flex justify-between"><span>Crit Damage:</span> <span>{Math.round(aircraft.stats.critDamage * 100)}%</span></div>
           </CardContent>
         </Card>
       ) : (
