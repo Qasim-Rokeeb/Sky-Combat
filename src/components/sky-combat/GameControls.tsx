@@ -45,7 +45,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       <Card className="bg-secondary/50 border-primary/20">
         <CardContent className="p-4 text-center">
             <p className="text-lg font-semibold font-headline">
-                Turn: <span className={isPlayerTurn ? 'text-primary' : 'text-destructive'}>{gameState.currentPlayer.toUpperCase()}</span>
+                Turn: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
             </p>
         </CardContent>
       </Card>
