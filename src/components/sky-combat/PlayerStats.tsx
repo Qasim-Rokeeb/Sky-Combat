@@ -13,6 +13,7 @@ interface PlayerStatsProps {
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
   const healthPercentage = aircraft ? (aircraft.stats.hp / aircraft.stats.maxHp) * 100 : 0;
+  const energyPercentage = aircraft ? (aircraft.stats.energy / aircraft.stats.maxEnergy) * 100 : 0;
   const xpPercentage = aircraft ? (aircraft.stats.xp / (100 * aircraft.stats.level)) * 100 : 0;
   
   const getHealthColor = () => {
@@ -43,6 +44,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
                   </div>
                   <Progress value={healthPercentage} className="h-2" indicatorClassName={getHealthColor()}/>
               </div>
+               <div>
+                  <div className="flex justify-between">
+                      <span>Energy</span>
+                      <span>{aircraft.stats.energy} / {aircraft.stats.maxEnergy}</span>
+                  </div>
+                  <Progress value={energyPercentage} className="h-2" indicatorClassName="bg-cyan-400"/>
+              </div>
               <div>
                   <div className="flex justify-between">
                       <span>XP</span>
@@ -57,7 +65,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-secondary/50 border-primary/20 flex items-center justify-center h-56">
+        <Card className="bg-secondary/50 border-primary/20 flex items-center justify-center h-64">
           <CardContent className="p-4 text-center text-muted-foreground">
             <p>Select an aircraft to view its stats.</p>
           </CardContent>

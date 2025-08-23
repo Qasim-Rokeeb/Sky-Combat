@@ -110,7 +110,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable, supportableAircraftIds: [] };
       }
       
-      if (action === "special" && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0) {
+      if (action === "special" && !aircraft.hasAttacked && aircraft.specialAbilityCooldown === 0 && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
           if (aircraft.type === 'support') {
             const supportable = Object.values(state.aircrafts).filter(target => {
                 if(target.owner !== state.currentPlayer) return false;
@@ -215,7 +215,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             const xpGained = healAmount;
 
             const updatedAircrafts = {...state.aircrafts};
-            const newSupporterStats = {...supporter.stats, xp: supporter.stats.xp + xpGained};
+            const newSupporterStats = {
+                ...supporter.stats, 
+                xp: supporter.stats.xp + xpGained,
+                energy: supporter.stats.energy - supporter.stats.specialAbilityCost,
+            };
+
             if(newSupporterStats.xp >= 100 * newSupporterStats.level){
                 newSupporterStats.level += 1;
                 newSupporterStats.xp = 0;
@@ -266,12 +271,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
         const updatedAircrafts = { ...state.aircrafts };
         Object.values(state.aircrafts).forEach(a => {
-            // Reset hasMoved/hasAttacked only for the player whose turn is starting
+            // Reset hasMoved/hasAttacked & regen energy for the player whose turn is starting
             if (a.owner === nextPlayer) {
                 updatedAircrafts[a.id] = { 
                     ...a, 
                     hasMoved: false, 
                     hasAttacked: false,
+                    stats: {
+                        ...a.stats,
+                        energy: Math.min(a.stats.maxEnergy, a.stats.energy + 10) // Regenerate 10 energy
+                    }
                 };
             }
             // Cooldowns tick down for everyone at the end of the current player's turn.

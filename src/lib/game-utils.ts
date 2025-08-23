@@ -53,6 +53,7 @@ export const createInitialState = (width: number, height: number): GameState => 
         hp: stats.maxHp,
         xp: 0,
         level: 1,
+        energy: stats.maxEnergy,
       },
       hasMoved: false,
       hasAttacked: false,
@@ -83,6 +84,7 @@ export const createInitialState = (width: number, height: number): GameState => 
         hp: stats.maxHp,
         xp: 0,
         level: 1,
+        energy: stats.maxEnergy,
        },
       hasMoved: false,
       hasAttacked: false,
@@ -132,7 +134,7 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
                 }
             }
 
-            if (targetToHeal) {
+            if (targetToHeal && aircraft.stats.energy >= aircraft.stats.specialAbilityCost) {
                 await new Promise(resolve => setTimeout(resolve, 300));
                 dispatch({ type: 'SELECT_AIRCRAFT', payload: { aircraftId: aircraft.id } });
                 await new Promise(resolve => setTimeout(resolve, 200));

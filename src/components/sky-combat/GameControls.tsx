@@ -46,7 +46,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   
   const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
   const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
-  const specialAbilityDescription = selectedAircraft ? AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription : "";
+  const hasEnoughEnergy = selectedAircraft && selectedAircraft.stats.energy >= selectedAircraft.stats.specialAbilityCost;
+  const specialAbilityDescription = selectedAircraft ? `${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription} (Cost: ${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityCost} Energy)` : "";
 
   const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id && !selectedAircraft.hasAttacked;
 
@@ -132,7 +133,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                 <TooltipTrigger asChild className="col-span-2">
                     <Button
                     onClick={() => onActionSelect("special")}
-                    disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown}
+                    disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown || !hasEnoughEnergy}
                     variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
                     >
                     <Zap className="mr-2 h-4 w-4" /> Special Ability

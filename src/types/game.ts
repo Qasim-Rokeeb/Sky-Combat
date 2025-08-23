@@ -12,6 +12,9 @@ export interface AircraftStats {
   speed: number;
   xp: number;
   level: number;
+  energy: number;
+  maxEnergy: number;
+  specialAbilityCost: number;
   specialAbilityDescription: string;
 }
 
