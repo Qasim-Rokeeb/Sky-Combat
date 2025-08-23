@@ -19,6 +19,7 @@ interface AircraftProps {
   isAttackable: boolean;
   isSupportable: boolean;
   animation: GameAnimation | null;
+  onClick: () => void;
 }
 
 const aircraftIcons: Record<AircraftType["type"], React.ReactNode> = {
@@ -39,6 +40,7 @@ const Aircraft: React.FC<AircraftProps> = ({
   isAttackable,
   isSupportable,
   animation,
+  onClick
 }) => {
   const isAttacker =
     (animation?.type === "attack" || animation?.type === 'heal') && animation.attackerId === aircraft.id;
@@ -56,13 +58,18 @@ const Aircraft: React.FC<AircraftProps> = ({
     return "bg-red-500";
   };
 
+  const handleWrapperClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the cell's onClick from firing
+    onClick();
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group",
+              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group cursor-pointer",
               aircraft.owner === "player" ? "text-primary" : "text-destructive",
               isSelected && "bg-accent/30 scale-110 animate-glow",
               isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
@@ -75,6 +82,7 @@ const Aircraft: React.FC<AircraftProps> = ({
               aircraft.statusEffects.includes('stunned') && "opacity-60"
             )}
             data-owner={aircraft.owner}
+            onClick={handleWrapperClick}
           >
             {isDefender && animation?.damage && (
               <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">

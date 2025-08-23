@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -47,8 +48,8 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                 key={`${x}-${y}`}
                 className={cn(
                   "border border-primary/10 flex items-center justify-center transition-all duration-300 hover:scale-105",
-                  (isPlayerTurn || (cell && cell.owner === 'player')) && "cursor-pointer",
-                  !isPlayerTurn && "cursor-not-allowed",
+                  isPlayerTurn && "cursor-pointer",
+                  !isPlayerTurn && !cell && "cursor-not-allowed",
                   isHighlighted ? "bg-primary/30" : "hover:bg-accent/20"
                 )}
                 onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
@@ -60,6 +61,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                     isAttackable={isAttackable}
                     isSupportable={isSupportable}
                     animation={animation}
+                    onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
                   />
                 )}
               </div>
