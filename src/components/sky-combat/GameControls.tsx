@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit, Timer } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import Link from "next/link";
 import { ThemeToggle } from "../theme-toggle";
 import { Slider } from "../ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { AIRCRAFT_STATS } from "@/lib/game-constants";
+import { AIRCRAFT_STATS, TURN_TIME_LIMIT } from "@/lib/game-constants";
 import { cn } from "@/lib/utils";
 
 interface GameControlsProps {
@@ -51,6 +51,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   const specialAbilityDescription = selectedAircraft ? `${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription} (Cost: ${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityCost} Energy)` : "";
 
   const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id && !selectedAircraft.hasAttacked;
+  
+  const timerPercentage = (gameState.turnTimeRemaining / TURN_TIME_LIMIT) * 100;
 
 
   return (
@@ -91,6 +93,12 @@ const GameControls: React.FC<GameControlsProps> = ({
                 <p className="text-lg font-semibold font-headline">
                     Turn: <span className="text-primary">{gameState.turnNumber}</span>
                 </p>
+                <div className="flex items-center gap-2 text-lg font-semibold font-headline">
+                  <Timer className={cn("w-6 h-6", gameState.turnTimeRemaining <= 5 && "text-destructive animate-pulse")} />
+                  <span className={cn(gameState.turnTimeRemaining <= 5 && "text-destructive animate-pulse")}>
+                    {gameState.turnTimeRemaining}s
+                  </span>
+                </div>
                 <p className="text-lg font-semibold font-headline">
                     Player: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
                 </p>
@@ -101,6 +109,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                     <p>AI's Turn</p>
                 </div>
             </div>
+             <Progress value={timerPercentage} className="h-1 bg-primary/20" indicatorClassName="bg-primary" />
         </CardContent>
       </Card>
 

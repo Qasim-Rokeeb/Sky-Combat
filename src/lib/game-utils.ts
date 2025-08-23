@@ -1,6 +1,6 @@
 
 import type { GameState, Grid, Aircraft } from "@/types/game";
-import { AIRCRAFT_STATS } from "./game-constants";
+import { AIRCRAFT_STATS, TURN_TIME_LIMIT } from "./game-constants";
 
 export const createInitialState = (width: number, height: number): GameState => {
   const grid: Grid = Array(height)
@@ -97,6 +97,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     turnNumber: 1,
     lastMove: null,
     actionLog: ["Game has started. It's player's turn."],
+    turnTimeRemaining: TURN_TIME_LIMIT,
   };
 };
 

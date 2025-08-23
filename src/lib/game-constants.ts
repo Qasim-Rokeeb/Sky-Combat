@@ -1,6 +1,8 @@
 
 import type { AircraftStats } from "@/types/game";
 
+export const TURN_TIME_LIMIT = 30; // seconds
+
 export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<AircraftStats, 'hp' | 'xp' | 'level' | 'energy'>> = {
   fighter: {
     maxHp: 100,

@@ -21,6 +21,7 @@ import type {
   LastMove,
 } from "@/types/game";
 import { createInitialState, opponentAI } from "@/lib/game-utils";
+import { TURN_TIME_LIMIT } from "@/lib/game-constants";
 import Battlefield from "@/components/sky-combat/Battlefield";
 import GameControls from "@/components/sky-combat/GameControls";
 import GameOverDialog from "@/components/sky-combat/GameOverDialog";
@@ -46,7 +47,8 @@ type GameAction =
   | { type: "RESET_GAME" }
   | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage?: number, healAmount?: number } }
   | { type: "CLEAR_ANIMATION" }
-  | { type: "UPDATE_STATUS_EFFECTS" };
+  | { type: "UPDATE_STATUS_EFFECTS" }
+  | { type: "TICK_TIMER" };
 
 const GRID_WIDTH = 12;
 const GRID_HEIGHT = 12;
@@ -394,6 +396,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             turnNumber: newTurnNumber,
             lastMove: null, // Clear last move on turn end
             actionLog: [...state.actionLog, logMessage],
+            turnTimeRemaining: TURN_TIME_LIMIT,
         };
     }
 
@@ -414,6 +417,44 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return state;
     }
 
+    case "TICK_TIMER": {
+        if (state.phase !== 'playing') return state;
+        const newTime = state.turnTimeRemaining - 1;
+        if (newTime <= 0) {
+            // Time's up, auto-end turn. This is a bit tricky because END_TURN is complex.
+            // For simplicity, we'll just return the state that would be returned by END_TURN.
+             const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
+            const updatedAircrafts = { ...state.aircrafts };
+            const newTurnNumber = nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber;
+            const logMessage = `Turn automatically ended for ${state.currentPlayer}. It's ${nextPlayer}'s turn.`;
+
+            Object.values(state.aircrafts).forEach(a => {
+                if (a.owner === nextPlayer) {
+                    updatedAircrafts[a.id] = { ...a, hasMoved: false, hasAttacked: false, stats: {...a.stats, energy: Math.min(a.stats.maxEnergy, a.stats.energy + 10)}};
+                }
+                 if (a.owner === state.currentPlayer) {
+                    updatedAircrafts[a.id] = { ...updatedAircrafts[a.id], specialAbilityCooldown: Math.max(0, a.specialAbilityCooldown -1), statusEffects: a.statusEffects.filter(e => e !== 'empowered')};
+                 }
+            });
+
+            return {
+                ...state,
+                currentPlayer: nextPlayer,
+                selectedAircraftId: null,
+                selectedAction: 'none',
+                actionHighlights: [],
+                attackableAircraftIds: [],
+                supportableAircraftIds: [],
+                aircrafts: updatedAircrafts,
+                turnNumber: newTurnNumber,
+                lastMove: null,
+                actionLog: [...state.actionLog, logMessage],
+                turnTimeRemaining: TURN_TIME_LIMIT,
+            };
+        }
+        return { ...state, turnTimeRemaining: newTime };
+    }
+
     default:
       return state;
   }
@@ -427,6 +468,7 @@ export default function SkyCombatPage() {
   const musicAudioRef = useRef<HTMLAudioElement>(null);
   const abilityAudioRef = useRef<HTMLAudioElement>(null);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const toggleMusic = () => {
     if (musicAudioRef.current) {
@@ -451,6 +493,26 @@ export default function SkyCombatPage() {
       abilityAudioRef.current.volume = volume;
     }
   }, [volume]);
+
+  // Game Timer
+  useEffect(() => {
+    if (state.phase === 'playing') {
+      timerRef.current = setInterval(() => {
+        dispatch({ type: 'TICK_TIMER' });
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [state.phase]);
+
 
   // Play ability sound effect when animation type is heal
   useEffect(() => {

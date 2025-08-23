@@ -74,4 +74,5 @@ export interface GameState {
   turnNumber: number;
   lastMove: LastMove | null;
   actionLog: string[];
+  turnTimeRemaining: number;
 }
