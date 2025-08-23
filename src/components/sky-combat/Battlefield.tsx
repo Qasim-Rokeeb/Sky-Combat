@@ -46,7 +46,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                   "border border-primary/10 flex items-center justify-center transition-colors duration-300",
                   (isPlayerTurn || (cell && cell.owner === 'player')) && "cursor-pointer",
                   !isPlayerTurn && "cursor-not-allowed",
-                  isHighlighted ? "bg-primary/30" : "hover:bg-accent/10"
+                  isHighlighted ? "bg-primary/30" : "hover:bg-accent/20"
                 )}
                 onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
               >
