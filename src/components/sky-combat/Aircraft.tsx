@@ -60,7 +60,7 @@ const Aircraft: React.FC<AircraftProps> = ({
               isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
               isDefender && animation?.type === 'attack' && "animate-shake",
               isAttacker && "animate-flash",
-              isDefender && animation?.type === 'heal' && 'animate-pulse'
+              isDefender && animation?.type === 'heal' && 'animate-heal'
             )}
             data-owner={aircraft.owner}
           >
