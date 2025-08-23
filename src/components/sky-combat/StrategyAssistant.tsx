@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from "react";
@@ -8,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getStrategySuggestion } from "@/ai/flows/strategy-ai-assistant";
 import type { GameState } from "@/types/game";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "../ui/skeleton";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface StrategyAssistantProps {
   gameState: GameState;
@@ -71,13 +72,7 @@ const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
       </CardHeader>
       <CardContent className="flex-grow flex flex-col justify-between">
         <div className="text-sm text-muted-foreground min-h-[6rem]">
-            {isLoading && (
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full bg-primary/20" />
-                    <Skeleton className="h-4 w-full bg-primary/20" />
-                    <Skeleton className="h-4 w-3/4 bg-primary/20" />
-                </div>
-            )}
+            {isLoading && <LoadingSpinner />}
             {suggestion && <p>{suggestion}</p>}
             {!isLoading && !suggestion && <p>Click for a strategic tip from our AI assistant.</p>}
         </div>

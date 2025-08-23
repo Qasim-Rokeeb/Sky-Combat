@@ -125,6 +125,10 @@ export default {
           '0%': { transform: 'scale(1.5) translateY(20px)', opacity: '0' },
           '50%': { transform: 'scale(1) translateY(0)', opacity: '1' },
           '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+        },
+        'spin-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         }
       },
       animation: {
@@ -138,6 +142,7 @@ export default {
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
         'victory-display': 'victory-display 1.5s ease-out forwards',
         'defeat-display': 'defeat-display 1.5s ease-out forwards',
+        'spin-slow': 'spin-slow 1.5s linear infinite',
       },
     },
   },
