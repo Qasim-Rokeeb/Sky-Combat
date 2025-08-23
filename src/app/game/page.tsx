@@ -24,6 +24,7 @@ import Battlefield from "@/components/sky-combat/Battlefield";
 import GameControls from "@/components/sky-combat/GameControls";
 import GameOverDialog from "@/components/sky-combat/GameOverDialog";
 import { useToast } from "@/hooks/use-toast";
+import PlayerStats from "@/components/sky-combat/PlayerStats";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -243,8 +244,15 @@ export default function SkyCombatPage() {
     }
   }, [state.animation]);
 
+  const selectedAircraft = state.selectedAircraftId
+    ? state.aircrafts[state.selectedAircraftId]
+    : null;
+
   return (
     <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+      <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+        <PlayerStats aircraft={selectedAircraft} />
+      </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
           grid={state.grid}
@@ -256,7 +264,7 @@ export default function SkyCombatPage() {
           isPlayerTurn={state.currentPlayer === 'player'}
         />
       </div>
-      <aside className="w-full lg:w-96 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <GameControls
           gameState={state}
           onActionSelect={handleActionSelect}
