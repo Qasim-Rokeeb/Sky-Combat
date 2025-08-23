@@ -25,6 +25,7 @@ import GameControls from "@/components/sky-combat/GameControls";
 import GameOverDialog from "@/components/sky-combat/GameOverDialog";
 import { useToast } from "@/hooks/use-toast";
 import PlayerStats from "@/components/sky-combat/PlayerStats";
+import MiniMap from "@/components/sky-combat/MiniMap";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -253,6 +254,7 @@ export default function SkyCombatPage() {
     <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <PlayerStats aircraft={selectedAircraft} />
+        <MiniMap gameState={state} />
       </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield

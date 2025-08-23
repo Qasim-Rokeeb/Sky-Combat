@@ -13,7 +13,7 @@ interface PlayerStatsProps {
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft }) => {
   return (
-    <div className="h-full">
+    <div>
       <h2 className="text-2xl font-bold text-center mb-4 font-headline tracking-widest text-primary-foreground animate-glow">Aircraft Stats</h2>
       {aircraft ? (
         <Card className="bg-secondary/50 border-primary/20">
