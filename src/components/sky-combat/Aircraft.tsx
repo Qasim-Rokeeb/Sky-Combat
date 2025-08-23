@@ -2,9 +2,9 @@
 "use client";
 
 import React from "react";
-import { Send, Bomb, Shield } from "lucide-react";
+import { Send, Bomb, Shield, ZapOff, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Aircraft as AircraftType, GameAnimation } from "@/types/game";
+import type { Aircraft as AircraftType, GameAnimation, StatusEffect } from "@/types/game";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
@@ -26,6 +26,12 @@ const aircraftIcons: Record<AircraftType["type"], React.ReactNode> = {
   bomber: <Bomb className="w-full h-full" />,
   support: <Shield className="w-full h-full" />,
 };
+
+const statusEffectIcons: Record<StatusEffect, React.ReactNode> = {
+    stunned: <ZapOff className="w-4 h-4 text-yellow-400" />,
+    shielded: <ShieldCheck className="w-4 h-4 text-blue-400" />,
+    empowered: <ZapOff className="w-4 h-4 text-purple-400" />,
+}
 
 const Aircraft: React.FC<AircraftProps> = ({
   aircraft,
@@ -65,7 +71,8 @@ const Aircraft: React.FC<AircraftProps> = ({
               isAttacker && "animate-flash",
               isDefender && animation?.type === 'heal' && 'animate-heal',
               isDestroyed && "animate-destroy",
-              isLowHp && !isDestroyed && "animate-low-hp-pulse"
+              isLowHp && !isDestroyed && "animate-low-hp-pulse",
+              aircraft.statusEffects.includes('stunned') && "opacity-60"
             )}
             data-owner={aircraft.owner}
           >
@@ -79,6 +86,16 @@ const Aircraft: React.FC<AircraftProps> = ({
                 +{animation.healAmount}
               </div>
             )}
+
+            <div className="absolute top-0 right-0 flex gap-1">
+                {aircraft.statusEffects.map(effect => (
+                    <div key={effect} className="p-0.5 bg-background/70 rounded-full">
+                        {statusEffectIcons[effect]}
+                    </div>
+                ))}
+            </div>
+
+
             <div
               className={cn(
                 "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",
@@ -97,7 +114,12 @@ const Aircraft: React.FC<AircraftProps> = ({
           </div>
         </TooltipTrigger>
         <TooltipContent className="w-48 p-2">
-            <div className="font-bold capitalize text-lg mb-2">{aircraft.type}</div>
+            <div className="font-bold capitalize text-lg mb-2 flex items-center gap-2">
+                <span>{aircraft.type}</span>
+                {aircraft.statusEffects.map(effect => (
+                    <span key={effect} className="text-xs capitalize font-normal px-2 py-0.5 bg-muted rounded-full">{effect}</span>
+                ))}
+            </div>
             <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
                     <span>HP:</span>

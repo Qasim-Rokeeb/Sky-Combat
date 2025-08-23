@@ -1,6 +1,8 @@
 
 export type Player = "player" | "opponent";
 
+export type StatusEffect = 'stunned' | 'shielded' | 'empowered';
+
 export interface AircraftStats {
   hp: number;
   maxHp: number;
@@ -23,6 +25,7 @@ export interface Aircraft {
   hasMoved: boolean;
   hasAttacked: boolean;
   specialAbilityCooldown: number;
+  statusEffects: StatusEffect[];
 }
 
 export type GridCell = Aircraft | null;

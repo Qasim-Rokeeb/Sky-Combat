@@ -30,6 +30,7 @@ export const createInitialState = (width: number, height: number): GameState => 
       hasMoved: false,
       hasAttacked: false,
       specialAbilityCooldown: 0,
+      statusEffects: [],
     };
     aircrafts[a.id] = aircraft;
     grid[a.position.y][a.position.x] = aircraft;
@@ -56,6 +57,7 @@ export const createInitialState = (width: number, height: number): GameState => 
       hasMoved: false,
       hasAttacked: false,
       specialAbilityCooldown: 0,
+      statusEffects: a.type === 'fighter' ? ['stunned'] : [],
     };
     aircrafts[a.id] = aircraft;
     grid[a.position.y][a.position.x] = aircraft;
