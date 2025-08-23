@@ -46,7 +46,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         <h1 className="text-3xl font-bold text-center font-headline tracking-widest text-primary-foreground animate-glow">Sky Combat</h1>
         <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={onToggleMusic}>
-              {isMusicPlaying ? <VolumeX /> : <Music />}
+              {isMusicPlaying ? <Volume2 /> : <VolumeX />}
             </Button>
             <ThemeToggle />
             <Link href="/">
