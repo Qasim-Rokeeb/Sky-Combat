@@ -12,6 +12,7 @@ export interface AircraftStats {
   speed: number;
   xp: number;
   level: number;
+  specialAbilityDescription: string;
 }
 
 export type AircraftType = "fighter" | "bomber" | "support";

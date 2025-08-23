@@ -13,6 +13,8 @@ import { Progress } from "../ui/progress";
 import Link from "next/link";
 import { ThemeToggle } from "../theme-toggle";
 import { Slider } from "../ui/slider";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { AIRCRAFT_STATS } from "@/lib/game-constants";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -42,6 +44,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   
   const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
   const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
+  const specialAbilityDescription = selectedAircraft ? AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription : "";
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -106,15 +109,23 @@ const GameControls: React.FC<GameControlsProps> = ({
             <Crosshair className="mr-2 h-4 w-4" /> Attack
           </Button>
           {hasSpecialAbility && (
-            <Button
-              onClick={() => onActionSelect("special")}
-              disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown}
-              variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
-              className="col-span-2"
-            >
-              <Zap className="mr-2 h-4 w-4" /> Special Ability
-              {specialAbilityOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild className="col-span-2">
+                    <Button
+                    onClick={() => onActionSelect("special")}
+                    disabled={!canAct || selectedAircraft!.hasAttacked || specialAbilityOnCooldown}
+                    variant={gameState.selectedAction === 'special' ? 'default' : 'secondary'}
+                    >
+                    <Zap className="mr-2 h-4 w-4" /> Special Ability
+                    {specialAbilityOnCooldown && ` (${selectedAircraft.specialAbilityCooldown})`}
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{specialAbilityDescription}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>
