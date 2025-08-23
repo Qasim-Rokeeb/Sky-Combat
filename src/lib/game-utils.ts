@@ -10,17 +10,17 @@ export const createInitialState = (width: number, height: number): GameState => 
   const aircrafts: Record<string, Aircraft> = {};
   const occupiedPositions = new Set<string>();
 
+  // Simple pseudo-random generator to avoid client-server mismatch
+  const pseudoRandom = (seed: number) => {
+      let x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+  }
+
   const getRandomPosition = (player: 'player' | 'opponent', seed: number) => {
     let x, y;
     const yRange = player === 'player' 
         ? {min: height - 3, max: height - 1} 
         : {min: 0, max: 2};
-    
-    // Simple pseudo-random generator to avoid client-server mismatch
-    const pseudoRandom = (seed: number) => {
-        let x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    }
     
     let randomSeed = seed;
     do {
@@ -33,6 +33,45 @@ export const createInitialState = (width: number, height: number): GameState => 
     return {x, y};
   }
 
+  const createAircraft = (id: string, type: "fighter" | "bomber" | "support", owner: 'player' | 'opponent', seed: number) => {
+    const position = getRandomPosition(owner, seed);
+    const baseStats = AIRCRAFT_STATS[type];
+
+    // Introduce stat variations. Values can be +/- 10% of the base.
+    const statVariation = (base: number, seed: number) => {
+        const variation = (pseudoRandom(seed) - 0.5) * 0.2; // -0.1 to +0.1
+        return Math.round(base * (1 + variation));
+    };
+    
+    let randomSeed = seed;
+    const variedStats = {
+        ...baseStats,
+        maxHp: statVariation(baseStats.maxHp, randomSeed++),
+        attack: statVariation(baseStats.attack, randomSeed++),
+        defense: statVariation(baseStats.defense, randomSeed++),
+    };
+    
+    const aircraft: Aircraft = {
+      id,
+      type,
+      position,
+      owner,
+      stats: { 
+        ...variedStats,
+        hp: variedStats.maxHp, // Start with full health
+        xp: 0,
+        level: 1,
+        energy: variedStats.maxEnergy,
+      },
+      hasMoved: false,
+      hasAttacked: false,
+      specialAbilityCooldown: 0,
+      statusEffects: [],
+    };
+    aircrafts[id] = aircraft;
+    grid[position.y][position.x] = aircraft;
+  }
+
   // Player aircraft
   const playerAircraftTypes: { id: string, type: "fighter" | "bomber" | "support" }[] = [
     { id: "p-f1", type: "fighter"},
@@ -41,27 +80,7 @@ export const createInitialState = (width: number, height: number): GameState => 
   ];
 
   playerAircraftTypes.forEach((a, index) => {
-    const position = getRandomPosition('player', index + 1);
-    const stats = AIRCRAFT_STATS[a.type];
-    const aircraft: Aircraft = {
-      id: a.id,
-      type: a.type,
-      position,
-      owner: "player",
-      stats: { 
-        ...stats,
-        hp: stats.maxHp,
-        xp: 0,
-        level: 1,
-        energy: stats.maxEnergy,
-      },
-      hasMoved: false,
-      hasAttacked: false,
-      specialAbilityCooldown: 0,
-      statusEffects: [],
-    };
-    aircrafts[a.id] = aircraft;
-    grid[position.y][position.x] = aircraft;
+    createAircraft(a.id, a.type, 'player', index + 1);
   });
 
   // Opponent aircraft
@@ -72,27 +91,7 @@ export const createInitialState = (width: number, height: number): GameState => 
   ];
 
   opponentAircraftTypes.forEach((a, index) => {
-    const position = getRandomPosition('opponent', (index + 1) * 100);
-    const stats = AIRCRAFT_STATS[a.type];
-    const aircraft: Aircraft = {
-      id: a.id,
-      type: a.type,
-      position,
-      owner: "opponent",
-      stats: { 
-        ...stats,
-        hp: stats.maxHp,
-        xp: 0,
-        level: 1,
-        energy: stats.maxEnergy,
-       },
-      hasMoved: false,
-      hasAttacked: false,
-      specialAbilityCooldown: 0,
-      statusEffects: [],
-    };
-    aircrafts[a.id] = aircraft;
-    grid[position.y][position.x] = aircraft;
+    createAircraft(a.id, a.type, 'opponent', (index + 1) * 100);
   });
 
   return {
