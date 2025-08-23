@@ -115,6 +115,12 @@ export default {
           '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
           '100%': { transform: 'translateY(-1.5rem) scale(1.1)', opacity: '0' },
         },
+        'victory-display': {
+          '0%': { transform: 'scale(0.3) rotate(-15deg)', opacity: '0' },
+          '50%': { transform: 'scale(1.1) rotate(5deg)', opacity: '1' },
+          '75%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -125,6 +131,7 @@ export default {
         'clouds': 'clouds 120s linear infinite',
         'click-highlight': 'click-highlight 0.3s ease-out',
         'damage-popup': 'damage-popup 0.7s ease-out forwards',
+        'victory-display': 'victory-display 1.5s ease-out forwards',
       },
     },
   },

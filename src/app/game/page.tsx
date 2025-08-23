@@ -28,6 +28,7 @@ import PlayerStats from "@/components/sky-combat/PlayerStats";
 import MiniMap from "@/components/sky-combat/MiniMap";
 import { cn } from "@/lib/utils";
 import Scoreboard from "@/components/sky-combat/Scoreboard";
+import VictoryAnimation from "@/components/sky-combat/VictoryAnimation";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -202,6 +203,7 @@ export default function SkyCombatPage() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [showGameOverDialog, setShowGameOverDialog] = useState(false);
 
   const toggleMusic = () => {
     if (audioRef.current) {
@@ -253,19 +255,32 @@ export default function SkyCombatPage() {
   };
   
   const handleResetGame = () => {
+      setShowGameOverDialog(false);
       dispatch({type: 'RESET_GAME'});
   }
 
   // Game Over Check
   useEffect(() => {
-    const playerAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'player');
-    const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
-    if (playerAircraft.length === 0) {
-      dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
-    } else if (opponentAircraft.length === 0) {
-      dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
+    if (state.phase === 'playing') {
+      const playerAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'player');
+      const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
+      if (playerAircraft.length === 0) {
+        dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
+      } else if (opponentAircraft.length === 0) {
+        dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
+      }
     }
-  }, [state.aircrafts]);
+  }, [state.aircrafts, state.phase]);
+  
+  // Game Over Dialog trigger
+  useEffect(() => {
+    if (state.phase === 'gameOver') {
+      const timer = setTimeout(() => {
+        setShowGameOverDialog(true);
+      }, state.winner === 'player' ? 2000 : 500); // Longer delay for victory animation
+      return () => clearTimeout(timer);
+    }
+  }, [state.phase, state.winner]);
 
   // Opponent Turn Logic
   useEffect(() => {
@@ -298,6 +313,7 @@ export default function SkyCombatPage() {
 
   return (
     <main className="relative flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+        <VictoryAnimation show={state.phase === 'gameOver' && state.winner === 'player'} />
         <div className={cn("absolute inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500", 
             state.currentPlayer === 'opponent' ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}>
@@ -337,12 +353,10 @@ export default function SkyCombatPage() {
         />
       </aside>
       <GameOverDialog 
-        isOpen={state.phase === 'gameOver'} 
+        isOpen={showGameOverDialog} 
         winner={state.winner}
         onReset={handleResetGame}
       />
     </main>
   );
 }
-
-    
