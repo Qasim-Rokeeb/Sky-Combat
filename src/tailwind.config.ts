@@ -149,7 +149,7 @@ export default {
         },
         'dodge': {
             '0%, 100%': { transform: 'translateX(0)' },
-            '50%': { transform: 'translateX(10px)' },
+            '50%': { transform: 'translateX(10px) scale(1.1)' },
         }
       },
       animation: {

@@ -90,6 +90,7 @@ const Aircraft: React.FC<AircraftProps> = ({
           >
             {isDefender && animation?.type === 'dodge' && (
                 <div className="absolute -top-10 text-blue-400 font-black text-xl animate-critical-popup flex items-center gap-1">
+                    <Shield className="w-6 h-6" />
                     DODGE!
                 </div>
             )}
