@@ -26,6 +26,7 @@ import GameOverDialog from "@/components/sky-combat/GameOverDialog";
 import { useToast } from "@/hooks/use-toast";
 import PlayerStats from "@/components/sky-combat/PlayerStats";
 import MiniMap from "@/components/sky-combat/MiniMap";
+import { cn } from "@/lib/utils";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -284,7 +285,14 @@ export default function SkyCombatPage() {
     : null;
 
   return (
-    <main className="flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+    <main className="relative flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+        <div className={cn("absolute inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500", 
+            state.currentPlayer === 'opponent' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}>
+            <div className="flex items-center justify-center h-full">
+                <p className="text-3xl font-headline text-destructive animate-pulse">Opponent's Turn</p>
+            </div>
+        </div>
       <audio ref={audioRef} loop>
         {/* You can replace this with your own music file */}
         <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Road-To-The-Unknown.mp3" type="audio/mpeg" />
