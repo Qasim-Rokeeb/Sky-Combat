@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -59,7 +60,7 @@ const Aircraft: React.FC<AircraftProps> = ({
         >
           <div
             className={cn(
-              "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300",
+              "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",
               "group-hover:scale-110"
             )}
           >
