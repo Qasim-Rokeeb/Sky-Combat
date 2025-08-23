@@ -67,7 +67,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const highlights = [];
         for (let i = -aircraft.stats.speed; i <= aircraft.stats.speed; i++) {
           for (let j = -aircraft.stats.speed; j <= aircraft.stats.speed; j++) {
-            if (Math.abs(i) + Math.abs(j) <= aircraft.stats.speed) {
+            if (Math.abs(i) + Math.abs(j) <= aircraft.stats.speed && Math.abs(i) + Math.abs(j) !== 0) {
               const newX = aircraft.position.x + i;
               const newY = aircraft.position.y + j;
               if (newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT && !state.grid[newY][newX]) {
@@ -87,7 +87,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         }).map(a => a.id);
         return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable };
       }
-      return state;
+      return {
+        ...state,
+        selectedAction: "none",
+        actionHighlights: [],
+        attackableAircraftIds: []
+      };
     }
 
     case "MOVE_AIRCRAFT": {
@@ -199,7 +204,11 @@ export default function SkyCombatPage() {
   };
 
   const handleActionSelect = (action: ActionType) => {
-    dispatch({ type: "SELECT_ACTION", payload: { action } });
+    if (state.selectedAction === action) {
+        dispatch({ type: "SELECT_ACTION", payload: { action: 'none' } });
+    } else {
+        dispatch({ type: "SELECT_ACTION", payload: { action } });
+    }
   };
   
   const handleEndTurn = () => {
