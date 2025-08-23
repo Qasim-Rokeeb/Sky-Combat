@@ -32,13 +32,14 @@ export const AIRCRAFT_STATS: Record<"fighter" | "bomber" | "support", Omit<Aircr
     maxHp: 80,
     attack: 15,
     defense: 20,
-    range: 2,
+    range: 4,
     speed: 3,
     maxEnergy: 120,
     specialAbilityCost: 40,
-    specialAbilityDescription: "Deploys a repair drone to a friendly unit, restoring a portion of its health.",
+    specialAbilityDescription: "Deploys a Repair Drone to a friendly unit, restoring a portion of its health.",
     critChance: 0.10, // 10%
     critDamage: 1.5, // 150% damage
     dodgeChance: 0.10, // 10%
   },
 };
+
