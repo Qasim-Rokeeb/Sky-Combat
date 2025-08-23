@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2 } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { ThemeToggle } from "../theme-toggle";
 import { Slider } from "../ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { AIRCRAFT_STATS } from "@/lib/game-constants";
+import { cn } from "@/lib/utils";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -86,13 +87,19 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       <Card className="bg-secondary/50 border-primary/20">
         <CardContent className="p-4 text-center">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-2">
                 <p className="text-lg font-semibold font-headline">
                     Turn: <span className="text-primary">{gameState.turnNumber}</span>
                 </p>
                 <p className="text-lg font-semibold font-headline">
                     Player: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
                 </p>
+            </div>
+             <div className={cn("relative transition-all duration-300", isPlayerTurn ? "max-h-0 opacity-0" : "max-h-20 opacity-100")}>
+                <div className="flex items-center justify-center gap-2 text-2xl font-headline text-destructive animate-pulse">
+                    <BrainCircuit className="w-8 h-8" />
+                    <p>AI's Turn</p>
+                </div>
             </div>
         </CardContent>
       </Card>
