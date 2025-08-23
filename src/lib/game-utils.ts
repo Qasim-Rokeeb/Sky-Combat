@@ -8,18 +8,45 @@ export const createInitialState = (width: number, height: number): GameState => 
     .map(() => Array(width).fill(null));
 
   const aircrafts: Record<string, Aircraft> = {};
+  const occupiedPositions = new Set<string>();
+
+  const getRandomPosition = (player: 'player' | 'opponent', seed: number) => {
+    let x, y;
+    const yRange = player === 'player' 
+        ? {min: height - 3, max: height - 1} 
+        : {min: 0, max: 2};
+    
+    // Simple pseudo-random generator to avoid client-server mismatch
+    const pseudoRandom = (seed: number) => {
+        let x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+    
+    let randomSeed = seed;
+    do {
+        randomSeed++;
+        x = Math.floor(pseudoRandom(randomSeed * 10) * width);
+        y = Math.floor(pseudoRandom(randomSeed * 100) * (yRange.max - yRange.min + 1)) + yRange.min;
+    } while (occupiedPositions.has(`${x},${y}`));
+    
+    occupiedPositions.add(`${x},${y}`);
+    return {x, y};
+  }
 
   // Player aircraft
-  const playerAircraft = [
-    { id: "p-f1", type: "fighter", position: { x: 2, y: height - 2 } },
-    { id: "p-b1", type: "bomber", position: { x: 3, y: height - 2 } },
-    { id: "p-s1", type: "support", position: { x: 4, y: height - 2 } },
+  const playerAircraftTypes: { id: string, type: "fighter" | "bomber" | "support" }[] = [
+    { id: "p-f1", type: "fighter"},
+    { id: "p-b1", type: "bomber"},
+    { id: "p-s1", type: "support"},
   ];
 
-  playerAircraft.forEach((a) => {
+  playerAircraftTypes.forEach((a, index) => {
+    const position = getRandomPosition('player', index + 1);
     const stats = AIRCRAFT_STATS[a.type];
     const aircraft: Aircraft = {
-      ...a,
+      id: a.id,
+      type: a.type,
+      position,
       owner: "player",
       stats: { 
         ...stats,
@@ -33,20 +60,23 @@ export const createInitialState = (width: number, height: number): GameState => 
       statusEffects: [],
     };
     aircrafts[a.id] = aircraft;
-    grid[a.position.y][a.position.x] = aircraft;
+    grid[position.y][position.x] = aircraft;
   });
 
   // Opponent aircraft
-  const opponentAircraft = [
-    { id: "o-f1", type: "fighter", position: { x: width - 3, y: 1 } },
-    { id: "o-b1", type: "bomber", position: { x: width - 4, y: 1 } },
-    { id: "o-s1", type: "support", position: { x: width - 5, y: 1 } },
+  const opponentAircraftTypes: { id: string, type: "fighter" | "bomber" | "support" }[] = [
+    { id: "o-f1", type: "fighter" },
+    { id: "o-b1", type: "bomber" },
+    { id: "o-s1", "type": "support" },
   ];
 
-  opponentAircraft.forEach((a) => {
+  opponentAircraftTypes.forEach((a, index) => {
+    const position = getRandomPosition('opponent', (index + 1) * 100);
     const stats = AIRCRAFT_STATS[a.type];
     const aircraft: Aircraft = {
-      ...a,
+      id: a.id,
+      type: a.type,
+      position,
       owner: "opponent",
       stats: { 
         ...stats,
@@ -60,7 +90,7 @@ export const createInitialState = (width: number, height: number): GameState => 
       statusEffects: a.type === 'fighter' ? ['stunned'] : [],
     };
     aircrafts[a.id] = aircraft;
-    grid[a.position.y][a.position.x] = aircraft;
+    grid[position.y][position.x] = aircraft;
   });
 
   return {
