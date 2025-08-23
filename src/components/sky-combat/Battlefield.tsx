@@ -43,7 +43,7 @@ const Battlefield: React.FC<BattlefieldProps> = ({
               <div
                 key={`${x}-${y}`}
                 className={cn(
-                  "border border-primary/10 flex items-center justify-center transition-colors duration-300",
+                  "border border-primary/10 flex items-center justify-center transition-all duration-300 hover:scale-105",
                   (isPlayerTurn || (cell && cell.owner === 'player')) && "cursor-pointer",
                   !isPlayerTurn && "cursor-not-allowed",
                   isHighlighted ? "bg-primary/30" : "hover:bg-accent/20"
