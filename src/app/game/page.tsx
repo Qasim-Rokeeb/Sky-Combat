@@ -156,6 +156,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             actionHighlights: [],
             attackableAircraftIds: [],
             aircrafts: updatedAircrafts,
+            turnNumber: nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber,
         };
     }
 

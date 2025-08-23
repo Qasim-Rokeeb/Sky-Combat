@@ -45,4 +45,5 @@ export interface GameState {
   actionHighlights: { x: number; y: number }[];
   attackableAircraftIds: string[];
   animation: GameAnimation | null;
+  turnNumber: number;
 }

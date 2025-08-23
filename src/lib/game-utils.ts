@@ -57,6 +57,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     actionHighlights: [],
     attackableAircraftIds: [],
     animation: null,
+    turnNumber: 1,
   };
 };
 
