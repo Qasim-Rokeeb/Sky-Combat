@@ -28,10 +28,10 @@ const aircraftIcons: Record<AircraftType["type"], React.ReactNode> = {
   support: <Shield className="w-full h-full" />,
 };
 
-const statusEffectIcons: Record<StatusEffect, React.ReactNode> = {
-    stunned: <ZapOff className="w-4 h-4 text-yellow-400" />,
-    shielded: <ShieldCheck className="w-4 h-4 text-blue-400" />,
-    empowered: <Zap className="w-4 h-4 text-purple-400" />,
+const statusEffectConfig: Record<StatusEffect, { icon: React.ReactNode; type: 'buff' | 'debuff' }> = {
+    stunned: { icon: <ZapOff className="w-4 h-4 text-yellow-400" />, type: 'debuff' },
+    shielded: { icon: <ShieldCheck className="w-4 h-4 text-blue-400" />, type: 'buff' },
+    empowered: { icon: <Zap className="w-4 h-4 text-purple-400" />, type: 'buff' },
 }
 
 const Aircraft: React.FC<AircraftProps> = ({
@@ -97,11 +97,18 @@ const Aircraft: React.FC<AircraftProps> = ({
             )}
 
             <div className="absolute top-0 right-0 flex gap-1">
-                {aircraft.statusEffects.map(effect => (
-                    <div key={effect} className="p-0.5 bg-background/70 rounded-full">
-                        {statusEffectIcons[effect]}
-                    </div>
-                ))}
+                {aircraft.statusEffects.map(effect => {
+                    const config = statusEffectConfig[effect];
+                    return (
+                        <div key={effect} className={cn(
+                            "p-0.5 bg-background/70 rounded-full",
+                            config.type === 'buff' && "shadow-[0_0_4px_1px_#22c55e]", // Green glow for buffs
+                            config.type === 'debuff' && "shadow-[0_0_4px_1px_#ef4444]", // Red glow for debuffs
+                        )}>
+                            {config.icon}
+                        </div>
+                    )
+                })}
             </div>
 
 
