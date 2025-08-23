@@ -30,6 +30,12 @@ const Aircraft: React.FC<AircraftProps> = ({
 
   const healthPercentage = (aircraft.stats.hp / aircraft.stats.maxHp) * 100;
 
+  const getHealthColor = () => {
+    if (healthPercentage > 70) return "bg-green-500";
+    if (healthPercentage > 30) return "bg-yellow-500";
+    return "bg-red-500";
+  }
+
   return (
     <div
       className={cn(
@@ -49,7 +55,7 @@ const Aircraft: React.FC<AircraftProps> = ({
         {aircraftIcons[aircraft.type]}
       </div>
       <div className="absolute bottom-0 w-full px-1">
-        <Progress value={healthPercentage} className="h-1 bg-secondary" />
+        <Progress value={healthPercentage} className="h-1 bg-secondary" indicatorClassName={getHealthColor()} />
       </div>
     </div>
   );
