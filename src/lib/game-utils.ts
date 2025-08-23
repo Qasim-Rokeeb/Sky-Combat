@@ -109,6 +109,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     animation: null,
     turnNumber: 1,
     lastMove: null,
+    actionLog: ["Game has started. It's player's turn."],
   };
 };
 

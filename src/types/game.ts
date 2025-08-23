@@ -67,4 +67,5 @@ export interface GameState {
   animation: GameAnimation | null;
   turnNumber: number;
   lastMove: LastMove | null;
+  actionLog: string[];
 }

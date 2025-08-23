@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import Scoreboard from "@/components/sky-combat/Scoreboard";
 import VictoryAnimation from "@/components/sky-combat/VictoryAnimation";
 import DefeatAnimation from "@/components/sky-combat/DefeatAnimation";
+import ActionLog from "@/components/sky-combat/ActionLog";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -149,6 +150,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           to: {x, y},
       }
 
+      const logMessage = `${aircraft.owner === 'player' ? 'Player' : 'Opponent'}'s ${aircraft.type} moved to (${x}, ${y}).`;
+
       return {
         ...state,
         grid: newGrid,
@@ -156,6 +159,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         actionHighlights: [],
         lastMove,
+        actionLog: [...state.actionLog, logMessage],
       };
     }
 
@@ -182,10 +186,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats, hasAttacked: true };
 
+      const newActionLog = [...state.actionLog];
+      const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
+      const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
+      newActionLog.push(`${attackerName} attacked ${defenderName} for ${damage} damage.`);
+
       let newGrid = state.grid.map(row => [...row]);
       if (newHp <= 0) {
         delete updatedAircrafts[targetId];
         newGrid[defender.position.y][defender.position.x] = null;
+        newActionLog.push(`${defenderName} has been destroyed!`);
       } else {
         updatedAircrafts[targetId] = { ...defender, stats: { ...defender.stats, hp: newHp } };
       }
@@ -199,6 +209,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         supportableAircraftIds: [],
         animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage },
         lastMove: null,
+        actionLog: newActionLog,
       };
     }
     
@@ -238,6 +249,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             };
             updatedAircrafts[target.id] = {...target, stats: {...target.stats, hp: newHp}};
             
+            const supporterName = `${supporter.owner === 'player' ? 'Player' : 'Opponent'}'s ${supporter.type}`;
+            const targetName = `${target.owner === 'player' ? 'Player' : 'Opponent'}'s ${target.type}`;
+            const logMessage = `${supporterName} healed ${targetName} for ${healAmount} HP.`;
+
             return {
                 ...state,
                 aircrafts: updatedAircrafts,
@@ -245,6 +260,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 supportableAircraftIds: [],
                 animation: {type: 'heal', attackerId: supporter.id, defenderId: target.id, healAmount},
                 lastMove: null,
+                actionLog: [...state.actionLog, logMessage],
             }
         }
         return state;
@@ -271,12 +287,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             lastMove: null,
             selectedAction: 'none',
             actionHighlights: [],
+            actionLog: state.actionLog.slice(0, -1), // Remove the move log
         };
     }
 
     case "END_TURN": {
         const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
         const updatedAircrafts = { ...state.aircrafts };
+        const newTurnNumber = nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber;
+        const logMessage = `Turn ${newTurnNumber} has begun. It's ${nextPlayer}'s turn.`;
+
         Object.values(state.aircrafts).forEach(a => {
             // Reset hasMoved/hasAttacked & regen energy for the player whose turn is starting
             if (a.owner === nextPlayer) {
@@ -310,13 +330,14 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             attackableAircraftIds: [],
             supportableAircraftIds: [],
             aircrafts: updatedAircrafts,
-            turnNumber: nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber,
+            turnNumber: newTurnNumber,
             lastMove: null, // Clear last move on turn end
+            actionLog: [...state.actionLog, logMessage],
         };
     }
 
     case "SET_GAME_OVER":
-        return { ...state, phase: 'gameOver', winner: action.payload.winner };
+        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner} is victorious!`]};
 
     case "RESET_GAME":
         return createInitialState(GRID_WIDTH, GRID_HEIGHT);
@@ -493,6 +514,7 @@ export default function SkyCombatPage() {
         <PlayerStats aircraft={selectedAircraft} />
         <MiniMap gameState={state} />
         <Scoreboard aircrafts={Object.values(state.aircrafts)} />
+        <ActionLog log={state.actionLog} />
       </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
@@ -526,5 +548,3 @@ export default function SkyCombatPage() {
     </main>
   );
 }
-
-    
