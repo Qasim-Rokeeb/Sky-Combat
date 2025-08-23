@@ -18,6 +18,7 @@ export interface AircraftStats {
   specialAbilityDescription: string;
   critChance: number;
   critDamage: number;
+  dodgeChance: number;
 }
 
 export type AircraftType = "fighter" | "bomber" | "support";
@@ -42,7 +43,7 @@ export type GamePhase = "playing" | "gameOver";
 export type ActionType = "move" | "attack" | "special" | "none";
 
 export interface GameAnimation {
-  type: 'attack' | 'heal';
+  type: 'attack' | 'heal' | 'dodge';
   attackerId: string;
   defenderId: string;
   damage?: number;

@@ -169,6 +169,29 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const attacker = state.aircrafts[state.selectedAircraftId];
       const defender = state.aircrafts[targetId];
 
+      const updatedAircrafts = { ...state.aircrafts };
+      let newActionLog = [...state.actionLog];
+
+      const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
+      const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
+      
+      updatedAircrafts[attacker.id] = { ...attacker, hasAttacked: true };
+
+      // Dodge check
+      const didDodge = Math.random() < defender.stats.dodgeChance;
+      if (didDodge) {
+          newActionLog.push(`${defenderName} dodged the attack from ${attackerName}!`);
+          return {
+            ...state,
+            aircrafts: updatedAircrafts,
+            selectedAction: 'none',
+            attackableAircraftIds: [],
+            animation: { type: 'dodge', attackerId: attacker.id, defenderId: defender.id },
+            lastMove: null,
+            actionLog: newActionLog,
+          }
+      }
+
       const isCritical = Math.random() < attacker.stats.critChance;
       let baseDamage = Math.max(1, attacker.stats.attack - defender.stats.defense);
       const damage = isCritical ? Math.floor(baseDamage * attacker.stats.critDamage) : baseDamage;
@@ -176,7 +199,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const newHp = defender.stats.hp - damage;
       const xpGained = damage; // Gain XP equal to damage dealt
 
-      const updatedAircrafts = { ...state.aircrafts };
       const newAttackerStats = { ...attacker.stats, xp: attacker.stats.xp + xpGained };
       // Simple leveling up
       if (newAttackerStats.xp >= 100 * newAttackerStats.level) {
@@ -189,9 +211,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats, hasAttacked: true };
 
-      const newActionLog = [...state.actionLog];
-      const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
-      const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
       if (isCritical) {
         newActionLog.push(`CRITICAL HIT! ${attackerName} attacked ${defenderName} for ${damage} damage.`);
       } else {

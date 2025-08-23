@@ -147,6 +147,10 @@ export default {
           '0%, 100%': { boxShadow: 'inset 0 0 0 2px hsl(var(--destructive))' },
           '50%': { boxShadow: 'inset 0 0 0 2px hsl(var(--destructive) / 0.5)' },
         },
+        'dodge': {
+            '0%, 100%': { transform: 'translateX(0)' },
+            '50%': { transform: 'translateX(10px)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -161,9 +165,10 @@ export default {
         'victory-display': 'victory-display 1.5s ease-out forwards',
         'defeat-display': 'defeat-display 1.5s ease-out forwards',
         'spin-slow': 'spin-slow 1.5s linear infinite',
-        heal: 'heal 0.7s ease-in-out',
+        'heal': 'heal 0.7s ease-in-out',
         'destroy': 'destroy 0.3s ease-in-out forwards',
         'low-hp-pulse': 'low-hp-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'dodge': 'dodge 0.3s ease-in-out',
       },
     },
   },

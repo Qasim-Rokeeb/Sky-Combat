@@ -48,6 +48,7 @@ export const createInitialState = (width: number, height: number): GameState => 
         xp: 0,
         level: 1,
         energy: baseStats.maxEnergy,
+        dodgeChance: baseStats.dodgeChance,
       },
       hasMoved: false,
       hasAttacked: false,

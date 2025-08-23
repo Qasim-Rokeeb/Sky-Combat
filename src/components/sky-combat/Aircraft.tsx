@@ -45,9 +45,9 @@ const Aircraft: React.FC<AircraftProps> = ({
   onClick
 }) => {
   const isAttacker =
-    (animation?.type === "attack" || animation?.type === 'heal') && animation.attackerId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge') && animation.attackerId === aircraft.id;
   const isDefender =
-    (animation?.type === "attack" || animation?.type === 'heal') && animation.defenderId === aircraft.id;
+    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge') && animation.defenderId === aircraft.id;
   const isDestroyed = aircraft.stats.hp <= 0;
 
 
@@ -79,6 +79,7 @@ const Aircraft: React.FC<AircraftProps> = ({
               isDefender && animation?.type === 'attack' && "animate-shake",
               isAttacker && "animate-flash",
               isDefender && animation?.type === 'heal' && 'animate-heal',
+              isDefender && animation?.type === 'dodge' && 'animate-dodge',
               isDestroyed && "animate-destroy",
               isLowHp && !isDestroyed && "animate-low-hp-pulse",
               aircraft.statusEffects.includes('stunned') && "opacity-60",
@@ -87,6 +88,11 @@ const Aircraft: React.FC<AircraftProps> = ({
             data-owner={aircraft.owner}
             onClick={handleWrapperClick}
           >
+            {isDefender && animation?.type === 'dodge' && (
+                <div className="absolute -top-10 text-blue-400 font-black text-xl animate-critical-popup flex items-center gap-1">
+                    DODGE!
+                </div>
+            )}
             {isDefender && animation?.isCritical && (
                 <div className="absolute -top-10 text-yellow-400 font-black text-xl animate-critical-popup flex items-center gap-1">
                     <Sparkles className="w-6 h-6" />
@@ -169,6 +175,10 @@ const Aircraft: React.FC<AircraftProps> = ({
                  <div className="flex justify-between">
                     <span>Crit Chance:</span>
                     <span>{Math.round(aircraft.stats.critChance * 100)}%</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Dodge Chance:</span>
+                    <span>{Math.round(aircraft.stats.dodgeChance * 100)}%</span>
                 </div>
             </div>
         </TooltipContent>
