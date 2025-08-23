@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -110,6 +111,10 @@ export default {
             '50%': { transform: 'scale(1.05)', filter: 'brightness(1.2)' },
             '100%': { transform: 'scale(1)', filter: 'brightness(1)' },
         },
+        'damage-popup': {
+          '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-1.5rem) scale(1.1)', opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -119,6 +124,7 @@ export default {
         'glow': 'glow 1.5s ease-in-out infinite',
         'clouds': 'clouds 120s linear infinite',
         'click-highlight': 'click-highlight 0.3s ease-out',
+        'damage-popup': 'damage-popup 0.7s ease-out forwards',
       },
     },
   },

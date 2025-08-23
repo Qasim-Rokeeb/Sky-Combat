@@ -58,6 +58,11 @@ const Aircraft: React.FC<AircraftProps> = ({
           )}
           data-owner={aircraft.owner}
         >
+          {isDefender && animation?.damage && (
+            <div className="absolute -top-6 text-destructive font-bold text-lg animate-damage-popup">
+              -{animation.damage}
+            </div>
+          )}
           <div
             className={cn(
               "w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 [filter:drop-shadow(0_2px_2px_rgba(0,0,0,0.4))]",

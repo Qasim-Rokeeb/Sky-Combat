@@ -36,7 +36,7 @@ type GameAction =
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
   | { type: "RESET_GAME" }
-  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string } }
+  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage: number } }
   | { type: "CLEAR_ANIMATION" };
 
 const GRID_WIDTH = 12;
@@ -141,7 +141,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         grid: newGrid,
         selectedAction: "none",
         attackableAircraftIds: [],
-        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id },
+        animation: { type: 'attack', attackerId: attacker.id, defenderId: defender.id, damage },
       };
     }
     
@@ -173,7 +173,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return createInitialState(GRID_WIDTH, GRID_HEIGHT);
     
     case "SHOW_ANIMATION":
-        return {...state, animation: {type: 'attack', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId}};
+        return {...state, animation: {type: 'attack', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId, damage: action.payload.damage}};
 
     case "CLEAR_ANIMATION":
         return {...state, animation: null};
@@ -250,7 +250,7 @@ export default function SkyCombatPage() {
     if (state.animation) {
         const timer = setTimeout(() => {
             dispatch({ type: 'CLEAR_ANIMATION' });
-        }, 500);
+        }, 700);
         return () => clearTimeout(timer);
     }
   }, [state.animation]);
@@ -291,5 +291,3 @@ export default function SkyCombatPage() {
     </main>
   );
 }
-
-    

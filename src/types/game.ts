@@ -1,3 +1,4 @@
+
 export type Player = "player" | "opponent";
 
 export interface AircraftStats {
@@ -32,6 +33,7 @@ export interface GameAnimation {
   type: 'attack';
   attackerId: string;
   defenderId: string;
+  damage: number;
 }
 
 export interface GameState {
