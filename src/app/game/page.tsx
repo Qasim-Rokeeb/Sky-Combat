@@ -342,15 +342,16 @@ export default function SkyCombatPage() {
   const { toast } = useToast();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const musicAudioRef = useRef<HTMLAudioElement>(null);
+  const abilityAudioRef = useRef<HTMLAudioElement>(null);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
 
   const toggleMusic = () => {
-    if (audioRef.current) {
+    if (musicAudioRef.current) {
         if (isMusicPlaying) {
-            audioRef.current.pause();
+            musicAudioRef.current.pause();
         } else {
-            audioRef.current.play();
+            musicAudioRef.current.play();
         }
         setIsMusicPlaying(!isMusicPlaying);
     }
@@ -361,10 +362,22 @@ export default function SkyCombatPage() {
   };
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+    if (musicAudioRef.current) {
+      musicAudioRef.current.volume = volume;
+    }
+    if (abilityAudioRef.current) {
+      abilityAudioRef.current.volume = volume;
     }
   }, [volume]);
+
+  // Play ability sound effect when animation type is heal
+  useEffect(() => {
+      if(state.animation?.type === 'heal' && abilityAudioRef.current){
+          abilityAudioRef.current.currentTime = 0;
+          abilityAudioRef.current.play();
+      }
+  }, [state.animation]);
+
 
   const handleCellClick = (x: number, y: number, aircraft: Aircraft | null) => {
     if (state.phase === 'gameOver') return;
@@ -470,9 +483,11 @@ export default function SkyCombatPage() {
                 <p className="text-3xl font-headline text-destructive animate-pulse">Opponent's Turn</p>
             </div>
         </div>
-      <audio ref={audioRef} loop>
-        {/* You can replace this with your own music file */}
+      <audio ref={musicAudioRef} loop>
         <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Road-To-The-Unknown.mp3" type="audio/mpeg" />
+      </audio>
+      <audio ref={abilityAudioRef}>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8b6a31262.mp3?filename=power-up-7103.mp3" type="audio/mpeg" />
       </audio>
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
         <PlayerStats aircraft={selectedAircraft} />
@@ -511,3 +526,5 @@ export default function SkyCombatPage() {
     </main>
   );
 }
+
+    
