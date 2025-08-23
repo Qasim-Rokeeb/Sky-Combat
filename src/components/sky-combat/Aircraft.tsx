@@ -69,7 +69,7 @@ const Aircraft: React.FC<AircraftProps> = ({
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group cursor-pointer",
+              "relative w-full h-full flex flex-col items-center justify-center p-1 transition-all duration-300 rounded-lg group cursor-pointer hover:bg-accent/20",
               aircraft.owner === "player" ? "text-primary" : "text-destructive",
               isSelected && "bg-accent/30 scale-110 animate-glow",
               isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
