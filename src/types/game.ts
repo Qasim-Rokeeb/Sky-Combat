@@ -41,6 +41,7 @@ export type GridCell = Aircraft | null;
 export type Grid = GridCell[][];
 
 export type GamePhase = "playing" | "gameOver";
+export type GameMode = 'standard' | 'challenge' | 'survival';
 
 export type ActionType = "move" | "attack" | "special" | "none";
 
@@ -80,4 +81,6 @@ export interface GameState {
   turnTimeRemaining: number;
   weather: WeatherCondition;
   visibleGrid: boolean[][];
+  mode: GameMode;
+  waveNumber?: number;
 }

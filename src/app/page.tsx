@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, Rocket, Trophy, Zap, Calendar } from "lucide-react";
+import { Gamepad2, Rocket, Trophy, Zap, Calendar, Shield } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -29,11 +29,17 @@ export default function LandingPage() {
               outsmart your opponents, and become the master of the skies in
               this strategic grid-based combat game.
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center flex-wrap">
               <Link href="/game">
                 <Button size="lg" className="font-bold text-lg">
                   <Gamepad2 className="mr-2" />
                   Play Now
+                </Button>
+              </Link>
+               <Link href="/survival">
+                <Button size="lg" className="font-bold text-lg" variant="secondary">
+                  <Shield className="mr-2" />
+                  Survival Mode
                 </Button>
               </Link>
                <Link href="/daily-challenge">

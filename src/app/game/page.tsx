@@ -19,8 +19,9 @@ import type {
   Aircraft,
   Grid,
   LastMove,
+  GameMode,
 } from "@/types/game";
-import { createInitialState, opponentAI } from "@/lib/game-utils";
+import { createInitialState, opponentAI, spawnWave } from "@/lib/game-utils";
 import { TURN_TIME_LIMIT } from "@/lib/game-constants";
 import Battlefield from "@/components/sky-combat/Battlefield";
 import GameControls from "@/components/sky-combat/GameControls";
@@ -45,11 +46,12 @@ type GameAction =
   | { type: "END_TURN" }
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
-  | { type: "RESET_GAME"; payload: { challenge?: string | null } }
+  | { type: "RESET_GAME"; payload: { mode?: GameMode, challenge?: string | null } }
   | { type: "SHOW_ANIMATION"; payload: { type: 'attack' | 'heal' | 'levelUp', aircraftId: string, defenderId?: string, damage?: number, healAmount?: number, level?: number } }
   | { type: "CLEAR_ANIMATION" }
   | { type: "UPDATE_STATUS_EFFECTS" }
-  | { type: "TICK_TIMER" };
+  | { type: "TICK_TIMER" }
+  | { type: "START_NEW_WAVE" };
 
 const GRID_WIDTH = 12;
 const GRID_HEIGHT = 12;
@@ -257,7 +259,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         newActionLog.push(`${defenderName} has been destroyed!`);
 
         const remainingDefenders = Object.values(updatedAircrafts).filter(a => a.owner === defender.owner);
-        if (remainingDefenders.length === 0) {
+        if (remainingDefenders.length === 0 && state.mode !== 'survival') {
              animation = { type: 'finalExplosion', attackerId: attacker.id, defenderId: defender.id, position: defender.position };
         }
       } else {
@@ -453,10 +455,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case "SET_GAME_OVER":
-        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner} is victorious!`].slice(-5)};
+        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner === 'player' ? `You survived ${state.waveNumber} waves!` : 'You were defeated.'}`].slice(-5)};
 
     case "RESET_GAME":
-        return createInitialState(GRID_WIDTH, GRID_HEIGHT, action.payload.challenge);
+        return createInitialState(GRID_WIDTH, GRID_HEIGHT, action.payload.mode, action.payload.challenge);
     
     case "SHOW_ANIMATION": {
         if (action.payload.type === 'attack') {
@@ -516,6 +518,20 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         }
         return { ...state, turnTimeRemaining: newTime };
     }
+    
+    case "START_NEW_WAVE": {
+        if (state.mode !== 'survival') return state;
+        const newWaveNumber = (state.waveNumber || 1) + 1;
+        const { newAircrafts, newGrid } = spawnWave(newWaveNumber, state.grid, state.aircrafts);
+
+        return {
+            ...state,
+            waveNumber: newWaveNumber,
+            aircrafts: newAircrafts,
+            grid: newGrid,
+            actionLog: [...state.actionLog, `Wave ${newWaveNumber} has started!`].slice(-5),
+        };
+    }
 
     default:
       return state;
@@ -525,7 +541,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 const GamePageContent = () => {
   const searchParams = useSearchParams();
   const challenge = searchParams.get('challenge');
-  const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT, challenge));
+  const modeParam = searchParams.get('mode');
+  const mode = (modeParam === 'survival' || modeParam === 'challenge' ? modeParam : 'standard') as GameMode;
+
+  const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT, mode, challenge));
   const { toast } = useToast();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
@@ -678,7 +697,7 @@ const GamePageContent = () => {
 
   const handleResetGame = () => {
       setShowGameOverDialog(false);
-      dispatch({type: 'RESET_GAME', payload: { challenge }});
+      dispatch({type: 'RESET_GAME', payload: { mode, challenge }});
   }
 
   // Game Over Check
@@ -686,25 +705,29 @@ const GamePageContent = () => {
     if (state.phase === 'playing') {
       const playerAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'player');
       const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
-      if (playerAircraft.length === 0 || opponentAircraft.length === 0) {
-        const winner = playerAircraft.length === 0 ? 'opponent' : 'player';
-        dispatch({ type: 'SET_GAME_OVER', payload: { winner } });
+      
+      if (playerAircraft.length === 0) {
+        dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
+         const currentLosses = parseInt(localStorage.getItem('sky-combat-losses') || '0', 10);
+         localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
+         localStorage.setItem('sky-combat-win-streak', '0');
+         const currentBattles = parseInt(localStorage.getItem('sky-combat-battles-played') || '0', 10);
+         localStorage.setItem('sky-combat-battles-played', (currentBattles + 1).toString());
 
-        // Update stats in localStorage
-        const currentLosses = parseInt(localStorage.getItem('sky-combat-losses') || '0', 10);
-        const currentBattles = parseInt(localStorage.getItem('sky-combat-battles-played') || '0', 10);
-        const currentWinStreak = parseInt(localStorage.getItem('sky-combat-win-streak') || '0', 10);
-
-        localStorage.setItem('sky-combat-battles-played', (currentBattles + 1).toString());
-        if (winner === 'opponent') {
-          localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
-          localStorage.setItem('sky-combat-win-streak', '0');
-        } else {
-          localStorage.setItem('sky-combat-win-streak', (currentWinStreak + 1).toString());
-        }
+      } else if (opponentAircraft.length === 0) {
+          if(state.mode === 'survival') {
+             dispatch({ type: 'START_NEW_WAVE' });
+             toast({ title: "Wave Cleared!", description: "The next wave is approaching." });
+          } else {
+            dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
+            const currentWinStreak = parseInt(localStorage.getItem('sky-combat-win-streak') || '0', 10);
+            localStorage.setItem('sky-combat-win-streak', (currentWinStreak + 1).toString());
+            const currentBattles = parseInt(localStorage.getItem('sky-combat-battles-played') || '0', 10);
+            localStorage.setItem('sky-combat-battles-played', (currentBattles + 1).toString());
+          }
       }
     }
-  }, [state.aircrafts, state.phase]);
+  }, [state.aircrafts, state.phase, state.mode, toast]);
   
   // Game Over Dialog trigger
   useEffect(() => {
@@ -797,6 +820,8 @@ const GamePageContent = () => {
         isOpen={showGameOverDialog} 
         winner={state.winner}
         onReset={handleResetGame}
+        waveNumber={state.waveNumber}
+        mode={state.mode}
       />
     </main>
   );

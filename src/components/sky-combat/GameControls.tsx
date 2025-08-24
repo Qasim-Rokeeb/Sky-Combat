@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit, Timer } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit, Timer, Waves } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -93,16 +93,22 @@ const GameControls: React.FC<GameControlsProps> = ({
                 <p className="text-lg font-semibold font-headline">
                     Turn: <span className="text-primary">{gameState.turnNumber}</span>
                 </p>
+                { gameState.mode === 'survival' && gameState.waveNumber && (
+                    <p className="text-lg font-semibold font-headline flex items-center gap-2">
+                        <Waves className="text-accent" />
+                        Wave: <span className="text-primary">{gameState.waveNumber}</span>
+                    </p>
+                )}
                 <div className="flex items-center gap-2 text-lg font-semibold font-headline">
                   <Timer className={cn("w-6 h-6", gameState.turnTimeRemaining <= 5 && "text-destructive animate-pulse")} />
                   <span className={cn(gameState.turnTimeRemaining <= 5 && "text-destructive animate-pulse")}>
                     {gameState.turnTimeRemaining}s
                   </span>
                 </div>
-                <p className="text-lg font-semibold font-headline">
-                    Player: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
-                </p>
             </div>
+             <p className="text-lg font-semibold font-headline mb-2">
+                    Player: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
+             </p>
              <div className={cn("relative transition-all duration-300", isPlayerTurn ? "max-h-0 opacity-0" : "max-h-20 opacity-100")}>
                 <div className="flex items-center justify-center gap-2 text-2xl font-headline text-destructive animate-pulse">
                     <BrainCircuit className="w-8 h-8" />

@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Home } from "lucide-react";
-import type { Player } from "@/types/game";
+import type { Player, GameMode } from "@/types/game";
 import { Button } from "../ui/button";
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
@@ -20,20 +20,36 @@ interface GameOverDialogProps {
   isOpen: boolean;
   winner: Player | null;
   onReset: () => void;
+  mode: GameMode;
+  waveNumber?: number;
 }
 
-const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset }) => {
+const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset, mode, waveNumber }) => {
+    const getTitle = () => {
+        if (winner === 'player') {
+            return mode === 'survival' ? `You Survived Wave ${waveNumber}!` : 'Victory!';
+        }
+        return 'Defeat!';
+    }
+    const getDescription = () => {
+        if (winner === 'player') {
+            return mode === 'survival' 
+                ? 'You live to fight another day.'
+                : 'You have successfully eliminated all enemy aircraft. Well done, commander!';
+        }
+        return `You made it to wave ${waveNumber} in survival mode. Better luck next time.`;
+    }
+
+
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-2xl text-center font-headline">
-            {winner === "player" ? "Victory!" : "Defeat!"}
+            {getTitle()}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center">
-            {winner === "player"
-              ? "You have successfully eliminated all enemy aircraft. Well done, commander!"
-              : "All your aircraft have been destroyed. Better luck next time."}
+            {getDescription()}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2">

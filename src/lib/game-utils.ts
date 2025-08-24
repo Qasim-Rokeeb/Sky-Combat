@@ -1,5 +1,5 @@
 
-import type { GameState, Grid, Aircraft, WeatherCondition } from "@/types/game";
+import type { GameState, Grid, Aircraft, WeatherCondition, GameMode } from "@/types/game";
 import { AIRCRAFT_STATS, TURN_TIME_LIMIT } from "./game-constants";
 
 // Default fleets
@@ -57,20 +57,96 @@ const dailyChallengeFleets: Record<string, { player: typeof defaultPlayerAircraf
     }
 };
 
+const createAircraft = (id: string, type: "fighter" | "bomber" | "support", owner: 'player' | 'opponent', position: { x: number; y: number }, level = 1) => {
+    const baseStats = AIRCRAFT_STATS[type];
+    
+    return {
+      id,
+      type,
+      position,
+      owner,
+      stats: { 
+        ...baseStats,
+        hp: baseStats.maxHp + (level - 1) * 10, // Increase hp for higher level waves
+        maxHp: baseStats.maxHp + (level - 1) * 10,
+        attack: baseStats.attack + (level - 1) * 5,
+        xp: 0,
+        level: level,
+        energy: baseStats.maxEnergy,
+        actionPoints: baseStats.maxActionPoints,
+        dodgeChance: baseStats.dodgeChance,
+      },
+      specialAbilityCooldown: 0,
+      statusEffects: [],
+    };
+  }
 
-export const createInitialState = (width: number, height: number, challengeId?: string | null): GameState => {
+export const spawnWave = (waveNumber: number, grid: Grid, existingAircrafts: Record<string, Aircraft>) => {
+    const newAircrafts = { ...existingAircrafts };
+    const newGrid = grid.map(row => [...row]);
+    const occupiedPositions = new Set<string>();
+    
+    Object.values(existingAircrafts).forEach(a => {
+        occupiedPositions.add(`${a.position.x},${a.position.y}`);
+    });
+
+    const pseudoRandom = (seed: number) => {
+        let x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+    
+    const getRandomPosition = (seed: number) => {
+        let x, y;
+        const yRange = {min: 0, max: 2};
+        let randomSeed = seed;
+        do {
+            randomSeed++;
+            x = Math.floor(pseudoRandom(randomSeed * waveNumber * 10) * grid[0].length);
+            y = Math.floor(pseudoRandom(randomSeed * waveNumber * 100) * (yRange.max - yRange.min + 1)) + yRange.min;
+        } while (occupiedPositions.has(`${x},${y}`));
+        
+        occupiedPositions.add(`${x},${y}`);
+        return {x, y};
+    }
+
+    const waveComposition = [
+        { type: 'fighter', count: 2 + waveNumber },
+        { type: 'bomber', count: 1 + Math.floor(waveNumber / 2) },
+        { type: 'support', count: waveNumber > 2 ? 1 + Math.floor((waveNumber - 1) / 3) : 0 },
+    ];
+
+    let seed = Date.now();
+    waveComposition.forEach(comp => {
+        for(let i=0; i < comp.count; i++) {
+            const id = `w${waveNumber}-${comp.type.charAt(0)}-${i}`;
+            const position = getRandomPosition(seed++);
+            const aircraft = createAircraft(id, comp.type as any, 'opponent', position, waveNumber);
+            newAircrafts[id] = aircraft;
+            newGrid[position.y][position.x] = aircraft;
+        }
+    })
+
+    return { newAircrafts, newGrid };
+}
+
+
+export const createInitialState = (width: number, height: number, mode: GameMode = 'standard', challengeId?: string | null): GameState => {
   const grid: Grid = Array(height)
     .fill(null)
     .map(() => Array(width).fill(null));
 
-  const aircrafts: Record<string, Aircraft> = {};
+  let aircrafts: Record<string, Aircraft> = {};
   const occupiedPositions = new Set<string>();
 
   const isChallenge = !!challengeId && challengeId in dailyChallengeFleets;
   const challenge = isChallenge ? dailyChallengeFleets[challengeId] : null;
 
   const playerAircraftTypes = challenge ? challenge.player : defaultPlayerAircrafts;
-  const opponentAircraftTypes = challenge ? challenge.opponent : defaultOpponentAircrafts;
+  let opponentAircraftTypes = challenge ? challenge.opponent : defaultOpponentAircrafts;
+  
+  if (mode === 'survival') {
+      opponentAircraftTypes = [];
+  }
 
   // Simple pseudo-random generator to avoid client-server mismatch
   const pseudoRandom = (seed: number) => {
@@ -95,37 +171,18 @@ export const createInitialState = (width: number, height: number, challengeId?: 
     return {x, y};
   }
 
-  const createAircraft = (id: string, type: "fighter" | "bomber" | "support", owner: 'player' | 'opponent', seed: number) => {
-    const position = getRandomPosition(owner, seed);
-    const baseStats = AIRCRAFT_STATS[type];
-    
-    const aircraft: Aircraft = {
-      id,
-      type,
-      position,
-      owner,
-      stats: { 
-        ...baseStats,
-        hp: baseStats.maxHp, // Start with full health
-        xp: 0,
-        level: 1,
-        energy: baseStats.maxEnergy,
-        actionPoints: baseStats.maxActionPoints,
-        dodgeChance: baseStats.dodgeChance,
-      },
-      specialAbilityCooldown: 0,
-      statusEffects: [],
-    };
-    aircrafts[id] = aircraft;
-    grid[position.y][position.x] = aircraft;
-  }
-
   playerAircraftTypes.forEach((a, index) => {
-    createAircraft(a.id, a.type, 'player', index + 1);
+    const position = getRandomPosition('player', index + 1);
+    const newAircraft = createAircraft(a.id, a.type, 'player', position);
+    aircrafts[newAircraft.id] = newAircraft;
+    grid[position.y][position.x] = newAircraft;
   });
 
   opponentAircraftTypes.forEach((a, index) => {
-    createAircraft(a.id, a.type, 'opponent', (index + 1) * 100);
+    const position = getRandomPosition('opponent', (index + 1) * 100);
+    const newAircraft = createAircraft(a.id, a.type, 'opponent', position);
+    aircrafts[newAircraft.id] = newAircraft;
+    grid[position.y][position.x] = newAircraft;
   });
 
   const weatherConditions: WeatherCondition[] = ["Clear Skies", "Strong Winds", "Thunderstorm"];
@@ -156,9 +213,8 @@ export const createInitialState = (width: number, height: number, challengeId?: 
             }
         }
     }
-
-
-  return {
+    
+  let initialState: GameState = {
     grid,
     aircrafts,
     destroyedAircrafts: {},
@@ -177,7 +233,19 @@ export const createInitialState = (width: number, height: number, challengeId?: 
     turnTimeRemaining: TURN_TIME_LIMIT,
     weather,
     visibleGrid,
+    mode: mode
   };
+  
+  if (mode === 'survival') {
+      const { newAircrafts, newGrid } = spawnWave(1, initialState.grid, initialState.aircrafts);
+      initialState.aircrafts = newAircrafts;
+      initialState.grid = newGrid;
+      initialState.waveNumber = 1;
+      initialState.actionLog.push("Survival Mode: Wave 1 has started!");
+  }
+
+
+  return initialState;
 };
 
 export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>) => {
