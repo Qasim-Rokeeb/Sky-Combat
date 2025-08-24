@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords, Flame, RotateCcw } from "lucide-react";
+import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords, Flame, RotateCcw, Shield } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +54,23 @@ const achievementsList: Achievement[] = [
   },
 ];
 
+interface Rank {
+    name: string;
+    battlesRequired: number;
+    icon: React.ReactElement;
+}
+
+const ranks: Rank[] = [
+    { name: "Recruit", battlesRequired: 0, icon: <Shield className="w-8 h-8"/> },
+    { name: "Private", battlesRequired: 10, icon: <Shield className="w-8 h-8"/> },
+    { name: "Corporal", battlesRequired: 25, icon: <Star className="w-8 h-8"/> },
+    { name: "Sergeant", battlesRequired: 50, icon: <Star className="w-8 h-8"/> },
+    { name: "Lieutenant", battlesRequired: 100, icon: <Award className="w-8 h-8"/> },
+    { name: "Captain", battlesRequired: 200, icon: <Trophy className="w-8 h-8"/> },
+    { name: "Major", battlesRequired: 500, icon: <Crown className="w-8 h-8"/> },
+    { name: "Colonel", battlesRequired: 1000, icon: <Crown className="w-8 h-8"/> },
+];
+
 
 export default function AchievementsPage() {
     const unlockedCount = achievementsList.filter(a => a.unlocked).length;
@@ -76,6 +93,8 @@ export default function AchievementsPage() {
             setWinStreak(parseInt(storedWinStreak, 10));
         }
     }, []);
+    
+    const currentRank = ranks.slice().reverse().find(rank => battlesPlayed >= rank.battlesRequired) || ranks[0];
 
     const handleResetStats = () => {
         localStorage.removeItem('sky-combat-losses');
@@ -98,7 +117,20 @@ export default function AchievementsPage() {
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+             <Card className="bg-primary/20 backdrop-blur-sm border-primary shadow-lg shadow-primary/20">
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10 text-primary">
+                        {currentRank.icon}
+                    </div>
+                    <CardTitle className="font-headline text-primary-foreground">
+                        Player Rank
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-4xl font-bold text-primary-foreground">{currentRank.name}</p>
+                </CardContent>
+            </Card>
             <Card className="bg-primary/20 backdrop-blur-sm border-primary shadow-lg shadow-primary/20">
                 <CardHeader className="flex flex-row items-center gap-4">
                     <div className="p-3 rounded-full bg-primary/10 text-primary">
@@ -138,7 +170,9 @@ export default function AchievementsPage() {
                     <p className="text-6xl font-bold text-destructive-foreground">{lossCount}</p>
                 </CardContent>
             </Card>
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {achievementsList.map((achievement) => (
             <Card
               key={achievement.id}
