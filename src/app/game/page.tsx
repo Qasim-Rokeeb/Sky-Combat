@@ -20,6 +20,7 @@ import type {
   Grid,
   LastMove,
   GameMode,
+  BattleSummary,
 } from "@/types/game";
 import { createInitialState, opponentAI, spawnWave } from "@/lib/game-utils";
 import { TURN_TIME_LIMIT } from "@/lib/game-constants";
@@ -454,9 +455,34 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
-    case "SET_GAME_OVER":
-        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner === 'player' ? `You survived ${state.waveNumber} waves!` : 'You were defeated.'}`].slice(-5)};
+    case "SET_GAME_OVER": {
+        const { winner } = action.payload;
 
+        const playerAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'player');
+        const opponentAircraftsDestroyedCount = Object.keys(state.destroyedAircrafts).filter(id => state.destroyedAircrafts[id].owner === 'opponent').length;
+        const playerAircraftsLostCount = Object.keys(state.destroyedAircrafts).filter(id => state.destroyedAircrafts[id].owner === 'player').length;
+        
+        const xpGained: Record<string, number> = {};
+        playerAircrafts.forEach(finalAircraft => {
+            const initialAircraft = state.initialAircrafts[finalAircraft.id];
+            if (initialAircraft) {
+                xpGained[finalAircraft.id] = finalAircraft.stats.xp - initialAircraft.stats.xp;
+            }
+        });
+
+        const battleSummary: BattleSummary = {
+            playerAircrafts: playerAircrafts,
+            opponentAircraftsDestroyed: opponentAircraftsDestroyedCount,
+            playerAircraftsLost: playerAircraftsLostCount,
+            xpGained
+        };
+        
+        const logMessage = winner === 'player' 
+            ? (state.mode === 'survival' ? `Game Over! You survived ${state.waveNumber} waves!` : 'Game Over! You were victorious!')
+            : 'Game Over! You were defeated.';
+
+        return { ...state, phase: 'gameOver', winner, battleSummary, actionLog: [...state.actionLog, logMessage].slice(-5)};
+    }
     case "RESET_GAME":
         return createInitialState(GRID_WIDTH, GRID_HEIGHT, action.payload.mode, action.payload.challenge);
     
@@ -822,6 +848,7 @@ const GamePageContent = () => {
         onReset={handleResetGame}
         waveNumber={state.waveNumber}
         mode={state.mode}
+        summary={state.battleSummary}
       />
     </main>
   );

@@ -62,9 +62,17 @@ export interface LastMove {
     to: { x: number; y: number };
 }
 
+export interface BattleSummary {
+    playerAircrafts: Aircraft[];
+    opponentAircraftsDestroyed: number;
+    playerAircraftsLost: number;
+    xpGained: Record<string, number>;
+}
+
 export interface GameState {
   grid: Grid;
   aircrafts: Record<string, Aircraft>;
+  initialAircrafts: Record<string, Aircraft>;
   destroyedAircrafts: Record<string, Aircraft>;
   currentPlayer: Player;
   phase: GamePhase;
@@ -83,4 +91,5 @@ export interface GameState {
   visibleGrid: boolean[][];
   mode: GameMode;
   waveNumber?: number;
+  battleSummary: BattleSummary | null;
 }

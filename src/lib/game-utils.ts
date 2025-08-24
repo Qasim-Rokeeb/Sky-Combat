@@ -217,6 +217,7 @@ export const createInitialState = (width: number, height: number, mode: GameMode
   let initialState: GameState = {
     grid,
     aircrafts,
+    initialAircrafts: JSON.parse(JSON.stringify(aircrafts)),
     destroyedAircrafts: {},
     currentPlayer: "player",
     phase: "playing",
@@ -233,7 +234,8 @@ export const createInitialState = (width: number, height: number, mode: GameMode
     turnTimeRemaining: TURN_TIME_LIMIT,
     weather,
     visibleGrid,
-    mode: mode
+    mode: mode,
+    battleSummary: null,
   };
   
   if (mode === 'survival') {
