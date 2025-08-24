@@ -36,6 +36,7 @@ import VictoryAnimation from "@/components/sky-combat/VictoryAnimation";
 import DefeatAnimation from "@/components/sky-combat/DefeatAnimation";
 import ActionLog from "@/components/sky-combat/ActionLog";
 import { useSearchParams } from "next/navigation";
+import TutorialDialog from "@/components/sky-combat/TutorialDialog";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -578,6 +579,19 @@ const GamePageContent = () => {
   const abilityAudioRef = useRef<HTMLAudioElement>(null);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    const tutorialShown = localStorage.getItem('sky-combat-tutorial-shown');
+    if (!tutorialShown) {
+        setShowTutorial(true);
+    }
+  }, []);
+
+  const handleTutorialFinish = () => {
+      localStorage.setItem('sky-combat-tutorial-shown', 'true');
+      setShowTutorial(false);
+  }
 
   const toggleMusic = () => {
     if (musicAudioRef.current) {
@@ -655,7 +669,7 @@ const GamePageContent = () => {
 
   // Game Timer
   useEffect(() => {
-    if (state.phase === 'playing') {
+    if (state.phase === 'playing' && !showTutorial) {
       timerRef.current = setInterval(() => {
         dispatch({ type: 'TICK_TIMER' });
       }, 1000);
@@ -670,7 +684,7 @@ const GamePageContent = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [state.phase]);
+  }, [state.phase, showTutorial]);
 
 
   // Play ability sound effect when animation type is heal
@@ -683,7 +697,7 @@ const GamePageContent = () => {
 
 
   const handleCellClick = (x: number, y: number, aircraft: Aircraft | null) => {
-    if (state.phase === 'gameOver') return;
+    if (state.phase === 'gameOver' || showTutorial) return;
 
     if (aircraft && aircraft.owner === state.currentPlayer) {
       dispatch({ type: "SELECT_AIRCRAFT", payload: { aircraftId: aircraft.id } });
@@ -706,6 +720,7 @@ const GamePageContent = () => {
   };
 
   const handleActionSelect = (action: ActionType) => {
+    if (showTutorial) return;
     if (state.selectedAction === action) {
         dispatch({ type: "SELECT_ACTION", payload: { action: 'none' } });
     } else {
@@ -714,10 +729,12 @@ const GamePageContent = () => {
   };
   
   const handleEndTurn = () => {
+    if (showTutorial) return;
     dispatch({ type: "END_TURN" });
   };
   
   const handleUndoMove = () => {
+    if (showTutorial) return;
     dispatch({ type: "UNDO_MOVE" });
   };
 
@@ -767,7 +784,7 @@ const GamePageContent = () => {
 
   // Opponent Turn Logic
   useEffect(() => {
-    if (state.currentPlayer === 'opponent' && state.phase === 'playing') {
+    if (state.currentPlayer === 'opponent' && state.phase === 'playing' && !showTutorial) {
       const opponentTurn = async () => {
           await new Promise(resolve => setTimeout(resolve, 500));
           toast({ title: "Opponent's Turn", description: "The opponent is making its move." });
@@ -778,7 +795,7 @@ const GamePageContent = () => {
       };
       opponentTurn();
     }
-  }, [state.currentPlayer, state.phase, toast, state]);
+  }, [state.currentPlayer, state.phase, toast, state, showTutorial]);
 
   // Animation Cleanup
   useEffect(() => {
@@ -799,7 +816,7 @@ const GamePageContent = () => {
         <VictoryAnimation show={state.phase === 'gameOver' && state.winner === 'player'} />
         <DefeatAnimation show={state.phase === 'gameOver' && state.winner === 'opponent'} />
         <div className={cn("absolute inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500", 
-            state.currentPlayer === 'opponent' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            state.currentPlayer === 'opponent' && !showTutorial ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}>
             <div className="flex items-center justify-center h-full">
                 <p className="text-3xl font-headline text-destructive animate-pulse">Opponent's Turn</p>
@@ -840,6 +857,7 @@ const GamePageContent = () => {
           onToggleMusic={toggleMusic}
           volume={volume}
           onVolumeChange={handleVolumeChange}
+          isTutorialActive={showTutorial}
         />
       </aside>
       <GameOverDialog 
@@ -850,6 +868,7 @@ const GamePageContent = () => {
         mode={state.mode}
         summary={state.battleSummary}
       />
+      <TutorialDialog isOpen={showTutorial} onFinish={handleTutorialFinish} />
     </main>
   );
 }

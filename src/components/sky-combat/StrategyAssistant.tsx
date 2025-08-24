@@ -13,9 +13,10 @@ import LoadingSpinner from "./LoadingSpinner";
 
 interface StrategyAssistantProps {
   gameState: GameState;
+  isTutorialActive: boolean;
 }
 
-const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
+const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState, isTutorialActive }) => {
   const [suggestion, setSuggestion] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
@@ -77,7 +78,7 @@ const StrategyAssistant: React.FC<StrategyAssistantProps> = ({ gameState }) => {
         </div>
         <Button
           onClick={handleGetSuggestion}
-          disabled={isLoading || gameState.currentPlayer !== 'player'}
+          disabled={isLoading || gameState.currentPlayer !== 'player' || isTutorialActive}
           className="w-full mt-4"
           variant="outline"
         >

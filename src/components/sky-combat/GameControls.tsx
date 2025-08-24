@@ -26,6 +26,7 @@ interface GameControlsProps {
   onToggleMusic: () => void;
   volume: number;
   onVolumeChange: (value: number[]) => void;
+  isTutorialActive: boolean;
 }
 
 const GameControls: React.FC<GameControlsProps> = ({
@@ -37,20 +38,21 @@ const GameControls: React.FC<GameControlsProps> = ({
   onToggleMusic,
   volume,
   onVolumeChange,
+  isTutorialActive
 }) => {
   const selectedAircraft = gameState.selectedAircraftId
     ? gameState.aircrafts[gameState.selectedAircraftId]
     : null;
 
   const isPlayerTurn = gameState.currentPlayer === "player";
-  const canAct = isPlayerTurn && selectedAircraft && selectedAircraft.stats.actionPoints > 0;
+  const canAct = isPlayerTurn && selectedAircraft && selectedAircraft.stats.actionPoints > 0 && !isTutorialActive;
   
   const hasSpecialAbility = selectedAircraft?.type === 'support'; // Add other types here later
   const specialAbilityOnCooldown = hasSpecialAbility && selectedAircraft.specialAbilityCooldown > 0;
   const hasEnoughEnergy = selectedAircraft && selectedAircraft.stats.energy >= selectedAircraft.stats.specialAbilityCost;
   const specialAbilityDescription = selectedAircraft ? `${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityDescription} (Cost: ${AIRCRAFT_STATS[selectedAircraft.type].specialAbilityCost} Energy, 1 AP)` : "";
 
-  const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id;
+  const canUndo = isPlayerTurn && gameState.lastMove?.aircraftId === selectedAircraft?.id && !isTutorialActive;
   
   const timerPercentage = (gameState.turnTimeRemaining / TURN_TIME_LIMIT) * 100;
 
@@ -109,7 +111,7 @@ const GameControls: React.FC<GameControlsProps> = ({
              <p className="text-lg font-semibold font-headline mb-2">
                     Player: <span className={`${isPlayerTurn ? 'text-primary' : 'text-destructive'} animate-glow`}>{gameState.currentPlayer.toUpperCase()}</span>
              </p>
-             <div className={cn("relative transition-all duration-300", isPlayerTurn ? "max-h-0 opacity-0" : "max-h-20 opacity-100")}>
+             <div className={cn("relative transition-all duration-300", isPlayerTurn && !isTutorialActive ? "max-h-0 opacity-0" : "max-h-20 opacity-100")}>
                 <div className="flex items-center justify-center gap-2 text-2xl font-headline text-destructive animate-pulse">
                     <BrainCircuit className="w-8 h-8" />
                     <p>AI's Turn</p>
@@ -174,13 +176,13 @@ const GameControls: React.FC<GameControlsProps> = ({
         </div>
       </div>
       
-      <Button onClick={onEndTurn} disabled={!isPlayerTurn} className="w-full font-bold">
+      <Button onClick={onEndTurn} disabled={!isPlayerTurn || isTutorialActive} className="w-full font-bold">
         End Turn
       </Button>
       
       <Separator />
 
-      <StrategyAssistant gameState={gameState} />
+      <StrategyAssistant gameState={gameState} isTutorialActive={isTutorialActive} />
     </div>
   );
 };
