@@ -106,7 +106,7 @@ export default function AchievementsPage() {
     };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-900 text-foreground">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-900 text-foreground bg-clouds">
       <header className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-5xl md:text-6xl font-bold font-headline tracking-widest text-primary-foreground animate-glow">
           Achievements
