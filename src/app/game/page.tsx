@@ -727,7 +727,7 @@ const GamePageContent = () => {
           }
       }
     }
-  }, [state.aircrafts, state.phase, state.mode, toast]);
+  }, [state.aircrafts, state.phase, state.mode, toast, dispatch]);
   
   // Game Over Dialog trigger
   useEffect(() => {
@@ -752,7 +752,7 @@ const GamePageContent = () => {
       };
       opponentTurn();
     }
-  }, [state.currentPlayer, state.phase, toast]);
+  }, [state.currentPlayer, state.phase, toast, state]);
 
   // Animation Cleanup
   useEffect(() => {

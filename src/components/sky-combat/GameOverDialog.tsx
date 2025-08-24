@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -27,17 +28,19 @@ interface GameOverDialogProps {
 const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset, mode, waveNumber }) => {
     const getTitle = () => {
         if (winner === 'player') {
-            return mode === 'survival' ? `You Survived Wave ${waveNumber}!` : 'Victory!';
+            return mode === 'survival' ? `Victory!` : 'Victory!';
         }
         return 'Defeat!';
     }
     const getDescription = () => {
         if (winner === 'player') {
-            return mode === 'survival' 
-                ? 'You live to fight another day.'
+             return mode === 'survival' 
+                ? `You survived ${waveNumber} waves!`
                 : 'You have successfully eliminated all enemy aircraft. Well done, commander!';
         }
-        return `You made it to wave ${waveNumber} in survival mode. Better luck next time.`;
+         return mode === 'survival' 
+            ? `You made it to wave ${waveNumber || 0} in survival mode. Better luck next time.`
+            : 'Your fleet has been destroyed. Better luck next time, commander.';
     }
 
 

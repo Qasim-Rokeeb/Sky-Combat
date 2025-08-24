@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo2, BrainCircuit, Timer, Waves } from "lucide-react";
+import { Crosshair, Move, Home, Music, VolumeX, Volume2, ShieldCheck, Zap, Undo, BrainCircuit, Timer, Waves, RotateCcw } from "lucide-react";
 
 import type { GameState, ActionType, Aircraft } from "@/types/game";
 import { Button } from "@/components/ui/button";
@@ -138,7 +138,7 @@ const GameControls: React.FC<GameControlsProps> = ({
                 size="icon"
                 className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
               >
-                <Undo2 />
+                <Undo />
               </Button>
             )}
           </div>
