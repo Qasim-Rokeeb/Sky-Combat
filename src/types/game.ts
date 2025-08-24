@@ -79,4 +79,5 @@ export interface GameState {
   actionLog: string[];
   turnTimeRemaining: number;
   weather: WeatherCondition;
+  visibleGrid: boolean[][];
 }

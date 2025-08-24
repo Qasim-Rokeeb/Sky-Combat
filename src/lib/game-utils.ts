@@ -82,6 +82,23 @@ export const createInitialState = (width: number, height: number): GameState => 
 
   const weatherConditions: WeatherCondition[] = ["Clear Skies", "Strong Winds", "Thunderstorm"];
   const weather = weatherConditions[Math.floor(pseudoRandom(new Date().getTime()) * weatherConditions.length)];
+  
+  const visibleGrid: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+   const playerAircrafts = Object.values(aircrafts).filter(a => a.owner === 'player');
+    for(const aircraft of playerAircrafts) {
+        const {x, y} = aircraft.position;
+        const visionRange = aircraft.stats.range + 2; 
+
+        for(let i = x - visionRange; i <= x + visionRange; i++) {
+            for(let j = y - visionRange; j <= y + visionRange; j++) {
+                if (i >= 0 && i < width && j >= 0 && j < height) {
+                    if(Math.abs(x - i) + Math.abs(y - j) <= visionRange) {
+                        visibleGrid[j][i] = true;
+                    }
+                }
+            }
+        }
+    }
 
 
   return {
@@ -102,6 +119,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     actionLog: [`Game has started. Weather: ${weather}. It's player's turn.`].slice(-5),
     turnTimeRemaining: TURN_TIME_LIMIT,
     weather,
+    visibleGrid,
   };
 };
 

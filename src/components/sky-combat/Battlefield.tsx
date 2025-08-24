@@ -90,14 +90,14 @@ const Battlefield: React.FC<BattlefieldProps> = ({
                 className={cn(
                   "border border-primary/10 flex items-center justify-center transition-all duration-300",
                   "bg-background/20",
-                  isVisible && "bg-transparent",
+                   !isVisible && "bg-black/50",
                   isPlayerTurn && "cursor-pointer",
                   !isPlayerTurn && !cell && "cursor-not-allowed",
                   isHighlighted ? "bg-primary/30" : "hover:bg-accent/20"
                 )}
                 onClick={() => isPlayerTurn && onCellClick(x, y, grid[y][x])}
               >
-                {aircraftOnCell && (
+                {aircraftOnCell && isVisible && (
                   <AircraftComponent
                     aircraft={aircraftOnCell}
                     isSelected={aircraftOnCell.id === selectedAircraftId}

@@ -381,9 +381,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
     case "END_TURN": {
         const nextPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
-        const updatedAircrafts = { ...state.aircrafts };
         const newTurnNumber = nextPlayer === 'player' ? state.turnNumber + 1 : state.turnNumber;
         const logMessage = `Turn ${newTurnNumber} has begun. It's ${nextPlayer}'s turn.`;
+        const updatedAircrafts = { ...state.aircrafts };
 
         Object.values(state.aircrafts).forEach(a => {
             // Reset actionPoints & regen energy for the player whose turn is starting
@@ -408,6 +408,32 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
              }
         });
 
+        const newVisibleGrid = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(false));
+        if (nextPlayer === 'opponent') {
+            // During opponent's turn, everything is visible for simplicity
+            for(let y=0; y<GRID_HEIGHT; y++) {
+                for(let x=0; x<GRID_WIDTH; x++) {
+                    newVisibleGrid[y][x] = true;
+                }
+            }
+        } else {
+             const playerAircrafts = Object.values(updatedAircrafts).filter(a => a.owner === 'player');
+             for(const aircraft of playerAircrafts) {
+                const {x, y} = aircraft.position;
+                const visionRange = aircraft.stats.range + 2; 
+
+                for(let i = x - visionRange; i <= x + visionRange; i++) {
+                    for(let j = y - visionRange; j <= y + visionRange; j++) {
+                        if (i >= 0 && i < GRID_WIDTH && j >= 0 && j < GRID_HEIGHT) {
+                            if(Math.abs(x - i) + Math.abs(y - j) <= visionRange) {
+                                newVisibleGrid[j][i] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return {
             ...state,
             currentPlayer: nextPlayer,
@@ -421,6 +447,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             lastMove: null, // Clear last move on turn end
             actionLog: [...state.actionLog, logMessage].slice(-5),
             turnTimeRemaining: TURN_TIME_LIMIT,
+            visibleGrid: newVisibleGrid,
         };
     }
 
@@ -524,11 +551,7 @@ export default function SkyCombatPage() {
     const visible = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(false));
     const playerAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'player');
 
-    if (state.currentPlayer === 'opponent') {
-        // During opponent's turn, everything is visible for simplicity
-        return Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(true));
-    }
-    
+    // For the player, calculate visibility based on their aircrafts
     for(const aircraft of playerAircrafts) {
         const {x, y} = aircraft.position;
         const visionRange = aircraft.stats.range + 2; // Vision is slightly larger than attack range
@@ -543,6 +566,15 @@ export default function SkyCombatPage() {
             }
         }
     }
+
+     if (state.currentPlayer === 'opponent') {
+        // During opponent's turn, reveal all tiles for simplicity
+        for(let y=0; y < GRID_HEIGHT; y++) {
+            for(let x=0; x < GRID_WIDTH; x++) {
+                visible[y][x] = true;
+            }
+        }
+    }
     return visible;
   }, [state.aircrafts, state.currentPlayer]);
   
@@ -550,13 +582,18 @@ export default function SkyCombatPage() {
   const playerVisibleGrid = useMemo(() => {
     return state.grid.map((row, y) => {
         return row.map((cell, x) => {
-            if (visibleGrid[y][x]) {
+            // During player's turn, only show what's in the visibleGrid
+            if (state.currentPlayer === 'player' && visibleGrid[y][x]) {
+                return cell;
+            }
+            // During opponent's turn, show everything.
+            if (state.currentPlayer === 'opponent') {
                 return cell;
             }
             return null;
         });
     });
-  }, [state.grid, visibleGrid]);
+  }, [state.grid, visibleGrid, state.currentPlayer]);
 
 
   useEffect(() => {
@@ -730,7 +767,7 @@ export default function SkyCombatPage() {
       </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
-          grid={playerVisibleGrid}
+          grid={state.grid}
           visibleGrid={visibleGrid}
           onCellClick={handleCellClick}
           selectedAircraftId={state.selectedAircraftId}
