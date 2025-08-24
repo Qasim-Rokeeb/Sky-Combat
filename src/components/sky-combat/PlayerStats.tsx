@@ -81,7 +81,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather }) => {
                       <span>XP</span>
                       <span>{aircraft.stats.xp} / {100 * aircraft.stats.level}</span>
                   </div>
-                  <Progress value={xpPercentage} className="h-2" indicatorClassName="bg-blue-400"/>
+                  <Progress value={xpPercentage} className="h-2" indicatorClassName="bg-purple-400"/>
               </div>
               <div className="flex justify-between"><span>Attack:</span> <span>{aircraft.stats.attack}</span></div>
               <div className="flex justify-between"><span>Defense:</span> <span>{aircraft.stats.defense}</span></div>

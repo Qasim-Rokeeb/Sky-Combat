@@ -234,6 +234,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         newAttackerStats.attack += 5;
         newAttackerStats.maxHp += 10;
         newAttackerStats.hp += 10;
+        newActionLog.push(`${attackerName} leveled up to level ${newAttackerStats.level}!`);
       }
 
       updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats };
