@@ -19,4 +19,5 @@ Sky Combat is a web-based strategy game where players engage in turn-based aeria
 *   **Typography:** Select readable fonts for in-game text.
 *   **Responsiveness:** The UI should be responsive and work well on different screen sizes.
 *   **Animations:** Use subtle animations to enhance the user experience.
+*   **More featues: coming soon.**
 
