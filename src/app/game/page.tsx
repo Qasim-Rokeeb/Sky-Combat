@@ -174,7 +174,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         actionHighlights: [],
         lastMove,
-        actionLog: [...state.actionLog, logMessage],
+        actionLog: [...state.actionLog, logMessage].slice(-5),
       };
     }
 
@@ -215,7 +215,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             attackableAircraftIds: [],
             animation: { type: 'dodge', attackerId: attacker.id, defenderId: defender.id },
             lastMove: null,
-            actionLog: newActionLog,
+            actionLog: newActionLog.slice(-5),
           }
       }
 
@@ -270,7 +270,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         supportableAircraftIds: [],
         animation,
         lastMove: null,
-        actionLog: newActionLog,
+        actionLog: newActionLog.slice(-5),
       };
     }
     
@@ -339,7 +339,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                     actionHighlights: [],
                     animation: {type: 'revive', attackerId: supporter.id, defenderId: revivedAircraft.id},
                     lastMove: null,
-                    actionLog: [...state.actionLog, logMessage],
+                    actionLog: [...state.actionLog, logMessage].slice(-5),
                 };
             }
         }
@@ -415,13 +415,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             aircrafts: updatedAircrafts,
             turnNumber: newTurnNumber,
             lastMove: null, // Clear last move on turn end
-            actionLog: [...state.actionLog, logMessage],
+            actionLog: [...state.actionLog, logMessage].slice(-5),
             turnTimeRemaining: TURN_TIME_LIMIT,
         };
     }
 
     case "SET_GAME_OVER":
-        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner} is victorious!`]};
+        return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner} is victorious!`].slice(-5)};
 
     case "RESET_GAME":
         return createInitialState(GRID_WIDTH, GRID_HEIGHT);
@@ -468,7 +468,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
                 aircrafts: updatedAircrafts,
                 turnNumber: newTurnNumber,
                 lastMove: null,
-                actionLog: [...state.actionLog, logMessage],
+                actionLog: [...state.actionLog, logMessage].slice(-5),
                 turnTimeRemaining: TURN_TIME_LIMIT,
             };
         }

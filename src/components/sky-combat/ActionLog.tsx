@@ -32,7 +32,7 @@ const ActionLog: React.FC<ActionLogProps> = ({ log }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-grow">
-        <ScrollArea className="h-48 w-full rounded-md border border-primary/20 bg-background/30 p-2" ref={scrollAreaRef}>
+        <ScrollArea className="h-24 w-full rounded-md border border-primary/20 bg-background/30 p-2" ref={scrollAreaRef}>
           <div className="flex flex-col gap-1 text-xs">
             {log.map((entry, index) => (
               <p key={index} className="leading-relaxed">

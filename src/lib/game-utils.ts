@@ -99,7 +99,7 @@ export const createInitialState = (width: number, height: number): GameState => 
     animation: null,
     turnNumber: 1,
     lastMove: null,
-    actionLog: [`Game has started. Weather: ${weather}. It's player's turn.`],
+    actionLog: [`Game has started. Weather: ${weather}. It's player's turn.`].slice(-5),
     turnTimeRemaining: TURN_TIME_LIMIT,
     weather,
   };
