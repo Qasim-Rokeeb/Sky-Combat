@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Award, Crown, Rocket, Star, Trophy, ShieldOff } from "lucide-react";
+import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,11 +59,16 @@ export default function AchievementsPage() {
     const unlockedCount = achievementsList.filter(a => a.unlocked).length;
     const totalCount = achievementsList.length;
     const [lossCount, setLossCount] = useState(0);
+    const [battlesPlayed, setBattlesPlayed] = useState(0);
 
     useEffect(() => {
         const storedLosses = localStorage.getItem('sky-combat-losses');
         if (storedLosses) {
             setLossCount(parseInt(storedLosses, 10));
+        }
+        const storedBattles = localStorage.getItem('sky-combat-battles-played');
+        if (storedBattles) {
+            setBattlesPlayed(parseInt(storedBattles, 10));
         }
     }, []);
 
@@ -80,6 +85,19 @@ export default function AchievementsPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-primary/20 backdrop-blur-sm border-primary shadow-lg shadow-primary/20">
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10 text-primary">
+                        <Swords className="w-8 h-8" />
+                    </div>
+                    <CardTitle className="font-headline text-primary-foreground">
+                        Total Battles
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-6xl font-bold text-primary-foreground">{battlesPlayed}</p>
+                </CardContent>
+            </Card>
             <Card className="bg-destructive/20 backdrop-blur-sm border-destructive shadow-lg shadow-destructive/20">
                 <CardHeader className="flex flex-row items-center gap-4">
                     <div className="p-3 rounded-full bg-destructive/10 text-destructive">

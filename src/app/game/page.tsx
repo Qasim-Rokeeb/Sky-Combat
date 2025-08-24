@@ -606,12 +606,18 @@ export default function SkyCombatPage() {
     if (state.phase === 'playing') {
       const playerAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'player');
       const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
-      if (playerAircraft.length === 0) {
-        dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
+      if (playerAircraft.length === 0 || opponentAircraft.length === 0) {
+        const winner = playerAircraft.length === 0 ? 'opponent' : 'player';
+        dispatch({ type: 'SET_GAME_OVER', payload: { winner } });
+
+        // Update stats in localStorage
         const currentLosses = parseInt(localStorage.getItem('sky-combat-losses') || '0', 10);
-        localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
-      } else if (opponentAircraft.length === 0) {
-        dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
+        const currentBattles = parseInt(localStorage.getItem('sky-combat-battles-played') || '0', 10);
+
+        localStorage.setItem('sky-combat-battles-played', (currentBattles + 1).toString());
+        if (winner === 'opponent') {
+          localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
+        }
       }
     }
   }, [state.aircrafts, state.phase]);
