@@ -613,10 +613,14 @@ export default function SkyCombatPage() {
         // Update stats in localStorage
         const currentLosses = parseInt(localStorage.getItem('sky-combat-losses') || '0', 10);
         const currentBattles = parseInt(localStorage.getItem('sky-combat-battles-played') || '0', 10);
+        const currentWinStreak = parseInt(localStorage.getItem('sky-combat-win-streak') || '0', 10);
 
         localStorage.setItem('sky-combat-battles-played', (currentBattles + 1).toString());
         if (winner === 'opponent') {
           localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
+          localStorage.setItem('sky-combat-win-streak', '0');
+        } else {
+          localStorage.setItem('sky-combat-win-streak', (currentWinStreak + 1).toString());
         }
       }
     }

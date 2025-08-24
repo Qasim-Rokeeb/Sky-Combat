@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords } from "lucide-react";
+import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords, Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +60,7 @@ export default function AchievementsPage() {
     const totalCount = achievementsList.length;
     const [lossCount, setLossCount] = useState(0);
     const [battlesPlayed, setBattlesPlayed] = useState(0);
+    const [winStreak, setWinStreak] = useState(0);
 
     useEffect(() => {
         const storedLosses = localStorage.getItem('sky-combat-losses');
@@ -69,6 +70,10 @@ export default function AchievementsPage() {
         const storedBattles = localStorage.getItem('sky-combat-battles-played');
         if (storedBattles) {
             setBattlesPlayed(parseInt(storedBattles, 10));
+        }
+        const storedWinStreak = localStorage.getItem('sky-combat-win-streak');
+        if (storedWinStreak) {
+            setWinStreak(parseInt(storedWinStreak, 10));
         }
     }, []);
 
@@ -96,6 +101,19 @@ export default function AchievementsPage() {
                 </CardHeader>
                 <CardContent className="text-center">
                     <p className="text-6xl font-bold text-primary-foreground">{battlesPlayed}</p>
+                </CardContent>
+            </Card>
+             <Card className="bg-green-500/20 backdrop-blur-sm border-green-500 shadow-lg shadow-green-500/20">
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="p-3 rounded-full bg-green-500/10 text-green-500">
+                        <Flame className="w-8 h-8" />
+                    </div>
+                    <CardTitle className="font-headline text-green-400">
+                        Win Streak
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-6xl font-bold text-green-400">{winStreak}</p>
                 </CardContent>
             </Card>
             <Card className="bg-destructive/20 backdrop-blur-sm border-destructive shadow-lg shadow-destructive/20">
