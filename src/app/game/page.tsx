@@ -104,10 +104,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       }
 
       if (action === "attack") {
+        const attackRange = state.weather === 'Thunderstorm' ? aircraft.stats.range - 1 : aircraft.stats.range;
         const attackable = Object.values(state.aircrafts).filter(target => {
           if (target.owner === state.currentPlayer) return false;
           const distance = Math.abs(target.position.x - aircraft.position.x) + Math.abs(target.position.y - aircraft.position.y);
-          return distance <= aircraft.stats.range;
+          return distance <= attackRange;
         }).map(a => a.id);
         return { ...state, selectedAction: "attack", actionHighlights: [], attackableAircraftIds: attackable, supportableAircraftIds: [] };
       }
@@ -198,7 +199,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       // Dodge check with evasion calculation
       const speedDifference = defender.stats.speed - attacker.stats.speed;
       const levelDifference = defender.stats.level - attacker.stats.level;
-      const effectiveDodgeChance = defender.stats.dodgeChance + (speedDifference * 0.01) + (levelDifference * 0.01);
+      let baseDodgeChance = defender.stats.dodgeChance;
+      if (state.weather === 'Strong Winds') {
+          baseDodgeChance += 0.15; // 15% bonus dodge in Strong Winds
+      }
+      const effectiveDodgeChance = baseDodgeChance + (speedDifference * 0.01) + (levelDifference * 0.01);
       
       const didDodge = Math.random() < effectiveDodgeChance;
       if (didDodge) {
@@ -652,7 +657,7 @@ export default function SkyCombatPage() {
         <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8b6a31262.mp3?filename=power-up-7103.mp3" type="audio/mpeg" />
       </audio>
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
-        <PlayerStats aircraft={selectedAircraft} />
+        <PlayerStats aircraft={selectedAircraft} weather={state.weather}/>
         <MiniMap gameState={state} />
         <Scoreboard aircrafts={Object.values(state.aircrafts)} destroyedAircrafts={Object.values(state.destroyedAircrafts)} />
         <ActionLog log={state.actionLog} />

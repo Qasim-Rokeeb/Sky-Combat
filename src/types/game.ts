@@ -3,6 +3,8 @@ export type Player = "player" | "opponent";
 
 export type StatusEffect = 'stunned' | 'shielded' | 'empowered';
 
+export type WeatherCondition = "Clear Skies" | "Strong Winds" | "Thunderstorm";
+
 export interface AircraftStats {
   hp: number;
   maxHp: number;
@@ -75,4 +77,5 @@ export interface GameState {
   lastMove: LastMove | null;
   actionLog: string[];
   turnTimeRemaining: number;
+  weather: WeatherCondition;
 }

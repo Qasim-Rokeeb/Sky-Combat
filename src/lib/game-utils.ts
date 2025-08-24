@@ -1,5 +1,5 @@
 
-import type { GameState, Grid, Aircraft } from "@/types/game";
+import type { GameState, Grid, Aircraft, WeatherCondition } from "@/types/game";
 import { AIRCRAFT_STATS, TURN_TIME_LIMIT } from "./game-constants";
 
 export const createInitialState = (width: number, height: number): GameState => {
@@ -80,6 +80,10 @@ export const createInitialState = (width: number, height: number): GameState => 
     createAircraft(a.id, a.type, 'opponent', (index + 1) * 100);
   });
 
+  const weatherConditions: WeatherCondition[] = ["Clear Skies", "Strong Winds", "Thunderstorm"];
+  const weather = weatherConditions[Math.floor(pseudoRandom(new Date().getTime()) * weatherConditions.length)];
+
+
   return {
     grid,
     aircrafts,
@@ -95,8 +99,9 @@ export const createInitialState = (width: number, height: number): GameState => 
     animation: null,
     turnNumber: 1,
     lastMove: null,
-    actionLog: ["Game has started. It's player's turn."],
+    actionLog: [`Game has started. Weather: ${weather}. It's player's turn.`],
     turnTimeRemaining: TURN_TIME_LIMIT,
+    weather,
   };
 };
 
@@ -144,10 +149,11 @@ export const opponentAI = async (state: GameState, dispatch: React.Dispatch<any>
         if (aircraft.stats.actionPoints > 0) {
             let targetToAttack: Aircraft | null = null;
             let minDistance = Infinity;
+            const range = state.weather === 'Thunderstorm' ? aircraft.stats.range - 1 : aircraft.stats.range;
 
             for (const target of playerAircrafts) {
                 const distance = Math.abs(aircraft.position.x - target.position.x) + Math.abs(aircraft.position.y - target.position.y);
-                if (distance <= aircraft.stats.range && distance < minDistance) {
+                if (distance <= range && distance < minDistance) {
                     targetToAttack = target;
                     minDistance = distance;
                 }
