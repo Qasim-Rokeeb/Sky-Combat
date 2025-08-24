@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Home, Star, Swords, ShieldOff } from "lucide-react";
+import { Home, Star, Swords, ShieldOff, HeartCrack, Timer } from "lucide-react";
 import type { Player, GameMode, BattleSummary } from "@/types/game";
 import { Button } from "../ui/button";
 import { RotateCcw } from "lucide-react";
@@ -63,7 +63,12 @@ const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset
             <div className="my-4 space-y-4">
                 <Separator />
                 <h3 className="text-xl font-headline text-center">Battle Summary</h3>
-                <div className="flex justify-around text-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                     <div>
+                        <Timer className="w-8 h-8 mx-auto text-muted-foreground" />
+                        <p className="font-bold text-2xl">{summary.totalTurns}</p>
+                        <p className="text-sm text-muted-foreground">Total Turns</p>
+                    </div>
                     <div>
                         <Swords className="w-8 h-8 mx-auto text-destructive" />
                         <p className="font-bold text-2xl">{summary.opponentAircraftsDestroyed}</p>
@@ -73,6 +78,11 @@ const GameOverDialog: React.FC<GameOverDialogProps> = ({ isOpen, winner, onReset
                         <ShieldOff className="w-8 h-8 mx-auto text-primary" />
                         <p className="font-bold text-2xl">{summary.playerAircraftsLost}</p>
                         <p className="text-sm text-muted-foreground">Aircrafts Lost</p>
+                    </div>
+                     <div>
+                        <HeartCrack className="w-8 h-8 mx-auto text-destructive" />
+                        <p className="font-bold text-2xl">{summary.totalDamageDealt}</p>
+                        <p className="text-sm text-muted-foreground">Damage Dealt</p>
                     </div>
                 </div>
 

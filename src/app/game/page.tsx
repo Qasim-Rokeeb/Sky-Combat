@@ -195,6 +195,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const updatedDestroyed = { ...state.destroyedAircrafts };
       let newActionLog = [...state.actionLog];
       let animation = state.animation;
+      let newDamageDealt = state.damageDealt;
+      let newDamageTaken = state.damageTaken;
 
       const attackerName = `${attacker.owner === 'player' ? 'Player' : 'Opponent'}'s ${attacker.type}`;
       const defenderName = `${defender.owner === 'player' ? 'Player' : 'Opponent'}'s ${defender.type}`;
@@ -227,6 +229,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const isCritical = Math.random() < attacker.stats.critChance;
       let baseDamage = Math.max(1, attacker.stats.attack - defender.stats.defense);
       const damage = isCritical ? Math.floor(baseDamage * attacker.stats.critDamage) : baseDamage;
+
+      if (attacker.owner === 'player') {
+          newDamageDealt += damage;
+      } else {
+          newDamageTaken += damage;
+      }
 
       const newHp = defender.stats.hp - damage;
       const xpGained = damage; // Gain XP equal to damage dealt
@@ -280,6 +288,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         animation: levelUpAnimation ?? animation,
         lastMove: null,
         actionLog: newActionLog.slice(-5),
+        damageDealt: newDamageDealt,
+        damageTaken: newDamageTaken,
       };
     }
     
@@ -475,7 +485,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             playerAircrafts: playerAircrafts,
             opponentAircraftsDestroyed: opponentAircraftsDestroyedCount,
             playerAircraftsLost: playerAircraftsLostCount,
-            xpGained
+            xpGained,
+            totalTurns: state.turnNumber,
+            totalDamageDealt: state.damageDealt,
+            totalDamageTaken: state.damageTaken,
         };
         
         const logMessage = winner === 'player' 

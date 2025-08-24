@@ -67,6 +67,9 @@ export interface BattleSummary {
     opponentAircraftsDestroyed: number;
     playerAircraftsLost: number;
     xpGained: Record<string, number>;
+    totalTurns: number;
+    totalDamageDealt: number;
+    totalDamageTaken: number;
 }
 
 export interface GameState {
@@ -92,4 +95,6 @@ export interface GameState {
   mode: GameMode;
   waveNumber?: number;
   battleSummary: BattleSummary | null;
+  damageDealt: number;
+  damageTaken: number;
 }

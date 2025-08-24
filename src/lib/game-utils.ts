@@ -236,6 +236,8 @@ export const createInitialState = (width: number, height: number, mode: GameMode
     visibleGrid,
     mode: mode,
     battleSummary: null,
+    damageDealt: 0,
+    damageTaken: 0,
   };
   
   if (mode === 'survival') {
