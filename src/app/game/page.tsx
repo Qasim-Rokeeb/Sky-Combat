@@ -608,6 +608,8 @@ export default function SkyCombatPage() {
       const opponentAircraft = Object.values(state.aircrafts).filter(a => a.owner === 'opponent');
       if (playerAircraft.length === 0) {
         dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'opponent' } });
+        const currentLosses = parseInt(localStorage.getItem('sky-combat-losses') || '0', 10);
+        localStorage.setItem('sky-combat-losses', (currentLosses + 1).toString());
       } else if (opponentAircraft.length === 0) {
         dispatch({ type: 'SET_GAME_OVER', payload: { winner: 'player' } });
       }

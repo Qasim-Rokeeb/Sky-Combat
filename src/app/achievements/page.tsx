@@ -1,13 +1,13 @@
 
 "use client";
 
-import { Award, Crown, Rocket, Star, Trophy } from "lucide-react";
+import { Award, Crown, Rocket, Star, Trophy, ShieldOff } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Achievement } from "@/types/achievements";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const achievementsList: Achievement[] = [
   {
@@ -58,6 +58,14 @@ const achievementsList: Achievement[] = [
 export default function AchievementsPage() {
     const unlockedCount = achievementsList.filter(a => a.unlocked).length;
     const totalCount = achievementsList.length;
+    const [lossCount, setLossCount] = useState(0);
+
+    useEffect(() => {
+        const storedLosses = localStorage.getItem('sky-combat-losses');
+        if (storedLosses) {
+            setLossCount(parseInt(storedLosses, 10));
+        }
+    }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground">
@@ -72,6 +80,20 @@ export default function AchievementsPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-destructive/20 backdrop-blur-sm border-destructive shadow-lg shadow-destructive/20">
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="p-3 rounded-full bg-destructive/10 text-destructive">
+                        <ShieldOff className="w-8 h-8" />
+                    </div>
+                    <CardTitle className="font-headline text-destructive-foreground">
+                        Total Losses
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-6xl font-bold text-destructive-foreground">{lossCount}</p>
+                </CardContent>
+            </Card>
+
           {achievementsList.map((achievement) => (
             <Card
               key={achievement.id}
