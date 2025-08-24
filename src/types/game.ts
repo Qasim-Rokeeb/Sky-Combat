@@ -45,13 +45,14 @@ export type GamePhase = "playing" | "gameOver";
 export type ActionType = "move" | "attack" | "special" | "none";
 
 export interface GameAnimation {
-  type: 'attack' | 'heal' | 'dodge' | 'revive' | 'finalExplosion';
-  attackerId: string;
-  defenderId: string;
+  type: 'attack' | 'heal' | 'dodge' | 'revive' | 'finalExplosion' | 'levelUp';
+  aircraftId: string;
+  defenderId?: string;
   damage?: number;
   healAmount?: number;
   isCritical?: boolean;
   position?: { x: number; y: number };
+  level?: number;
 }
 
 export interface LastMove {

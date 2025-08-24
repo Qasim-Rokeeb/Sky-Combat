@@ -159,6 +159,15 @@ export default {
         'stun': {
             '0%, 100%': { opacity: '1' },
             '50%': { opacity: '0.4' },
+        },
+        'level-up': {
+          '0%': { transform: 'scale(1)', filter: 'brightness(1)' },
+          '50%': { transform: 'scale(1.1)', filter: 'brightness(2) drop-shadow(0 0 8px hsl(var(--primary)))' },
+          '100%': { transform: 'scale(1)', filter: 'brightness(1)' },
+        },
+        'level-up-glow': {
+          '0%, 100%': { boxShadow: '0 0 5px hsl(var(--primary))' },
+          '50%': { boxShadow: '0 0 20px hsl(var(--primary))' },
         }
       },
       animation: {
@@ -180,6 +189,8 @@ export default {
         'dodge': 'dodge 0.3s ease-in-out',
         'final-explosion': 'final-explosion 0.7s ease-out forwards',
         'stun': 'stun 0.5s ease-in-out infinite',
+        'level-up': 'level-up 0.7s ease-out',
+        'level-up-glow': 'level-up-glow 1.5s ease-out',
       },
     },
   },

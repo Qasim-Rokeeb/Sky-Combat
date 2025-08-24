@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Send, Bomb, Shield, Zap, ZapOff, ShieldCheck, Sparkles } from "lucide-react";
+import { Send, Bomb, Shield, Zap, ZapOff, ShieldCheck, Sparkles, ChevronsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Aircraft as AircraftType, GameAnimation, StatusEffect } from "@/types/game";
 import { Progress } from "@/components/ui/progress";
@@ -44,10 +44,8 @@ const Aircraft: React.FC<AircraftProps> = ({
   isFlipped,
   onClick
 }) => {
-  const isAttacker =
-    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge' || animation?.type === 'revive') && animation.attackerId === aircraft.id;
-  const isDefender =
-    (animation?.type === "attack" || animation?.type === 'heal' || animation?.type === 'dodge' || animation?.type === 'revive') && animation.defenderId === aircraft.id;
+  const isAnimating = animation?.aircraftId === aircraft.id;
+  const isDefender = animation?.defenderId === aircraft.id;
   const isDestroyed = aircraft.stats.hp <= 0;
 
 
@@ -77,8 +75,8 @@ const Aircraft: React.FC<AircraftProps> = ({
               isSelected && "bg-accent/30 scale-110 animate-glow",
               isAttackable && "bg-destructive/50 cursor-crosshair animate-glow",
               isSupportable && "bg-green-500/50 cursor-pointer animate-glow",
+              isAnimating && animation?.type === 'attack' && "animate-flash",
               isDefender && animation?.type === 'attack' && "animate-shake",
-              isAttacker && "animate-flash",
               isDefender && (animation?.type === 'heal' || animation?.type === 'revive') && 'animate-heal',
               isDefender && animation?.type === 'dodge' && 'animate-dodge',
               isDestroyed && "animate-destroy",
@@ -86,10 +84,17 @@ const Aircraft: React.FC<AircraftProps> = ({
               aircraft.statusEffects.includes('stunned') && "opacity-60",
               aircraft.stats.actionPoints === 0 && 'opacity-50',
               aircraft.statusEffects.includes('empowered') && "animate-empowered-glow",
+              isAnimating && animation?.type === 'levelUp' && 'animate-level-up',
             )}
             data-owner={aircraft.owner}
             onClick={handleWrapperClick}
           >
+             {isAnimating && animation?.type === 'levelUp' && (
+                <div className="absolute -top-10 text-green-400 font-black text-xl animate-critical-popup flex items-center gap-1">
+                    <ChevronsUp className="w-6 h-6" />
+                    LEVEL UP! {animation.level}
+                </div>
+            )}
             {isDefender && animation?.type === 'dodge' && (
                 <div className="absolute -top-10 text-blue-400 font-black text-xl animate-critical-popup flex items-center gap-1">
                     <Shield className="w-6 h-6" />

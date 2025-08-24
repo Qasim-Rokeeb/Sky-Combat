@@ -45,7 +45,7 @@ type GameAction =
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
   | { type: "RESET_GAME" }
-  | { type: "SHOW_ANIMATION"; payload: { attackerId: string, defenderId: string, damage?: number, healAmount?: number } }
+  | { type: "SHOW_ANIMATION"; payload: { type: 'attack' | 'heal' | 'levelUp', aircraftId: string, defenderId?: string, damage?: number, healAmount?: number, level?: number } }
   | { type: "CLEAR_ANIMATION" }
   | { type: "UPDATE_STATUS_EFFECTS" }
   | { type: "TICK_TIMER" };
@@ -227,6 +227,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const xpGained = damage; // Gain XP equal to damage dealt
 
       const newAttackerStats = { ...attacker.stats, xp: attacker.stats.xp + xpGained, actionPoints: attacker.stats.actionPoints - 1 };
+      
+      let levelUpAnimation = null;
       // Simple leveling up
       if (newAttackerStats.xp >= 100 * newAttackerStats.level) {
         newAttackerStats.level += 1;
@@ -235,6 +237,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         newAttackerStats.maxHp += 10;
         newAttackerStats.hp += 10;
         newActionLog.push(`${attackerName} leveled up to level ${newAttackerStats.level}!`);
+        levelUpAnimation = { type: 'levelUp', aircraftId: attacker.id, level: newAttackerStats.level };
       }
 
       updatedAircrafts[attacker.id] = { ...attacker, stats: newAttackerStats };
@@ -269,7 +272,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         selectedAction: "none",
         attackableAircraftIds: [],
         supportableAircraftIds: [],
-        animation,
+        animation: levelUpAnimation ?? animation,
         lastMove: null,
         actionLog: newActionLog.slice(-5),
       };
@@ -427,8 +430,18 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     case "RESET_GAME":
         return createInitialState(GRID_WIDTH, GRID_HEIGHT);
     
-    case "SHOW_ANIMATION":
-        return {...state, animation: {type: action.payload.damage ? 'attack' : 'heal', attackerId: action.payload.attackerId, defenderId: action.payload.defenderId, damage: action.payload.damage, healAmount: action.payload.healAmount}};
+    case "SHOW_ANIMATION": {
+        if (action.payload.type === 'attack') {
+             return {...state, animation: {type: 'attack', attackerId: action.payload.aircraftId, defenderId: action.payload.defenderId!, damage: action.payload.damage}};
+        }
+        if (action.payload.type === 'heal') {
+             return {...state, animation: {type: 'heal', attackerId: action.payload.aircraftId, defenderId: action.payload.defenderId!, healAmount: action.payload.healAmount}};
+        }
+        if (action.payload.type === 'levelUp') {
+            return {...state, animation: {type: 'levelUp', aircraftId: action.payload.aircraftId, level: action.payload.level }};
+        }
+        return state;
+    }
 
     case "CLEAR_ANIMATION":
         return {...state, animation: null};
@@ -537,7 +550,7 @@ export default function SkyCombatPage() {
 
   // Play ability sound effect when animation type is heal
   useEffect(() => {
-      if((state.animation?.type === 'heal' || state.animation?.type === 'revive') && abilityAudioRef.current){
+      if((state.animation?.type === 'heal' || state.animation?.type === 'revive' || state.animation?.type === 'levelUp') && abilityAudioRef.current){
           abilityAudioRef.current.currentTime = 0;
           abilityAudioRef.current.play();
       }
@@ -658,7 +671,7 @@ export default function SkyCombatPage() {
         <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8b6a31262.mp3?filename=power-up-7103.mp3" type="audio/mpeg" />
       </audio>
       <aside className="w-full lg:w-80 bg-card/50 backdrop-blur-sm text-card-foreground rounded-lg shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
-        <PlayerStats aircraft={selectedAircraft} weather={state.weather}/>
+        <PlayerStats aircraft={selectedAircraft} weather={state.weather} animation={state.animation} />
         <MiniMap gameState={state} />
         <Scoreboard aircrafts={Object.values(state.aircrafts)} destroyedAircrafts={Object.values(state.destroyedAircrafts)} />
         <ActionLog log={state.actionLog} />

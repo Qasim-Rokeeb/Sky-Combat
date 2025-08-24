@@ -4,13 +4,15 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { Aircraft, WeatherCondition } from "@/types/game";
+import type { Aircraft, WeatherCondition, GameAnimation } from "@/types/game";
 import { Skeleton } from "../ui/skeleton";
 import { Sun, Wind, CloudLightning } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PlayerStatsProps {
   aircraft: Aircraft | null;
   weather: WeatherCondition;
+  animation: GameAnimation | null;
 }
 
 const weatherIcons: Record<WeatherCondition, React.ReactNode> = {
@@ -19,7 +21,7 @@ const weatherIcons: Record<WeatherCondition, React.ReactNode> = {
     "Thunderstorm": <CloudLightning className="w-5 h-5 text-purple-400" />,
 }
 
-const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather }) => {
+const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation }) => {
   const healthPercentage = aircraft ? (aircraft.stats.hp / aircraft.stats.maxHp) * 100 : 0;
   const energyPercentage = aircraft ? (aircraft.stats.energy / aircraft.stats.maxEnergy) * 100 : 0;
   const xpPercentage = aircraft ? (aircraft.stats.xp / (100 * aircraft.stats.level)) * 100 : 0;
@@ -33,6 +35,8 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather }) => {
 
   const displayRange = aircraft ? (weather === 'Thunderstorm' ? aircraft.stats.range -1 : aircraft.stats.range) : 0;
   const displayDodge = aircraft ? (weather === 'Strong Winds' ? aircraft.stats.dodgeChance + 0.15 : aircraft.stats.dodgeChance) : 0;
+  
+  const isLevelingUp = animation?.type === 'levelUp' && animation?.aircraftId === aircraft?.id;
 
   return (
     <div>
@@ -44,7 +48,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather }) => {
           </div>
         </div>
       {aircraft ? (
-        <Card className="bg-secondary/50 border-primary/20">
+        <Card className={cn("bg-secondary/50 border-primary/20", isLevelingUp && "animate-level-up-glow")}>
           <CardHeader className="p-4">
             <CardTitle className="text-lg capitalize flex items-center justify-between font-headline">
               <div className="flex items-center gap-2">
