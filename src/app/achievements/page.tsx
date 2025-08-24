@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords, Flame } from "lucide-react";
+import { Award, Crown, Rocket, Star, Trophy, ShieldOff, Swords, Flame, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,6 +76,15 @@ export default function AchievementsPage() {
             setWinStreak(parseInt(storedWinStreak, 10));
         }
     }, []);
+
+    const handleResetStats = () => {
+        localStorage.removeItem('sky-combat-losses');
+        localStorage.removeItem('sky-combat-battles-played');
+        localStorage.removeItem('sky-combat-win-streak');
+        setLossCount(0);
+        setBattlesPlayed(0);
+        setWinStreak(0);
+    };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground">
@@ -155,11 +164,17 @@ export default function AchievementsPage() {
       </main>
 
        <footer className="container mx-auto px-4 py-8 text-center">
-            <Link href="/">
-              <Button size="lg">
-                Back to Main Menu
-              </Button>
-            </Link>
+            <div className="flex justify-center gap-4">
+                <Link href="/">
+                  <Button size="lg">
+                    Back to Main Menu
+                  </Button>
+                </Link>
+                <Button size="lg" variant="destructive" onClick={handleResetStats}>
+                    <RotateCcw className="mr-2" />
+                    Reset Stats
+                </Button>
+            </div>
         </footer>
     </div>
   );
