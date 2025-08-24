@@ -825,7 +825,7 @@ const GamePageContent = () => {
     : null;
 
   return (
-    <main className="relative flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900 text-foreground p-4 gap-4 overflow-hidden">
+    <main className="relative flex h-screen w-screen flex-col lg:flex-row bg-gradient-to-br from-slate-900 via-black to-slate-900 text-foreground p-4 gap-4 overflow-hidden">
         <VictoryAnimation show={state.phase === 'gameOver' && state.winner === 'player'} />
         <DefeatAnimation show={state.phase === 'gameOver' && state.winner === 'opponent'} />
         <div className={cn("absolute inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500", 
