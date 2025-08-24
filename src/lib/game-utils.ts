@@ -2,13 +2,75 @@
 import type { GameState, Grid, Aircraft, WeatherCondition } from "@/types/game";
 import { AIRCRAFT_STATS, TURN_TIME_LIMIT } from "./game-constants";
 
-export const createInitialState = (width: number, height: number): GameState => {
+// Default fleets
+const defaultPlayerAircrafts: { id: string, type: "fighter" | "bomber" | "support" }[] = [
+    { id: "p-f1", type: "fighter"},
+    { id: "p-b1", type: "bomber"},
+    { id: "p-s1", type: "support"},
+];
+
+const defaultOpponentAircrafts: { id: string, type: "fighter" | "bomber" | "support" }[] = [
+    { id: "o-f1", type: "fighter" },
+    { id: "o-b1", type: "bomber" },
+    { id: "o-s1", "type": "support" },
+];
+
+
+// Daily Challenge Fleet Definitions
+const dailyChallengeFleets: Record<string, { player: typeof defaultPlayerAircrafts, opponent: typeof defaultOpponentAircrafts, weather?: WeatherCondition }> = {
+    "survival_sunday": {
+        player: [{ id: "p-s1", type: "support" }],
+        opponent: [
+            { id: "o-f1", type: "fighter" },
+            { id: "o-f2", type: "fighter" },
+            { id: "o-f3", type: "fighter" },
+            { id: "o-f4", type: "fighter" },
+        ],
+        weather: "Clear Skies"
+    },
+    "bomber_blitz": {
+        player: [
+            { id: "p-b1", type: "bomber" },
+            { id: "p-b2", type: "bomber" },
+        ],
+        opponent: [
+            { id: "o-s1", type: "support" },
+            { id: "o-f1", type: "fighter" },
+        ],
+        weather: "Clear Skies"
+    },
+     "fighter_frenzy": {
+        player: [
+            { id: "p-f1", type: "fighter" },
+            { id: "p-f2", type: "fighter" },
+        ],
+        opponent: [
+            { id: "o-f1", type: "fighter" },
+            { id: "o-f2", type: "fighter" },
+        ],
+        weather: "Strong Winds"
+    },
+     "stealth_saturday": {
+        player: defaultPlayerAircrafts,
+        opponent: defaultOpponentAircrafts,
+        weather: "Thunderstorm" // Will be overridden to make it super foggy
+    }
+};
+
+
+export const createInitialState = (width: number, height: number, challengeId?: string | null): GameState => {
   const grid: Grid = Array(height)
     .fill(null)
     .map(() => Array(width).fill(null));
 
   const aircrafts: Record<string, Aircraft> = {};
   const occupiedPositions = new Set<string>();
+
+  const isChallenge = !!challengeId && challengeId in dailyChallengeFleets;
+  const challenge = isChallenge ? dailyChallengeFleets[challengeId] : null;
+
+  const playerAircraftTypes = challenge ? challenge.player : defaultPlayerAircrafts;
+  const opponentAircraftTypes = challenge ? challenge.opponent : defaultOpponentAircrafts;
 
   // Simple pseudo-random generator to avoid client-server mismatch
   const pseudoRandom = (seed: number) => {
@@ -58,36 +120,31 @@ export const createInitialState = (width: number, height: number): GameState => 
     grid[position.y][position.x] = aircraft;
   }
 
-  // Player aircraft
-  const playerAircraftTypes: { id: string, type: "fighter" | "bomber" | "support" }[] = [
-    { id: "p-f1", type: "fighter"},
-    { id: "p-b1", type: "bomber"},
-    { id: "p-s1", type: "support"},
-  ];
-
   playerAircraftTypes.forEach((a, index) => {
     createAircraft(a.id, a.type, 'player', index + 1);
   });
-
-  // Opponent aircraft
-  const opponentAircraftTypes: { id: string, type: "fighter" | "bomber" | "support" }[] = [
-    { id: "o-f1", type: "fighter" },
-    { id: "o-b1", type: "bomber" },
-    { id: "o-s1", "type": "support" },
-  ];
 
   opponentAircraftTypes.forEach((a, index) => {
     createAircraft(a.id, a.type, 'opponent', (index + 1) * 100);
   });
 
   const weatherConditions: WeatherCondition[] = ["Clear Skies", "Strong Winds", "Thunderstorm"];
-  const weather = weatherConditions[Math.floor(pseudoRandom(new Date().getTime()) * weatherConditions.length)];
+  let weather: WeatherCondition;
+  if(challenge?.weather) {
+      weather = challenge.weather;
+  } else if (challengeId === 'stealth_saturday') {
+      weather = "Thunderstorm"; // Special case for dense fog
+  }
+  else {
+      weather = weatherConditions[Math.floor(pseudoRandom(new Date().getTime()) * weatherConditions.length)];
+  }
   
   const visibleGrid: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
-   const playerAircrafts = Object.values(aircrafts).filter(a => a.owner === 'player');
-    for(const aircraft of playerAircrafts) {
+   const playerAircraftsList = Object.values(aircrafts).filter(a => a.owner === 'player');
+    for(const aircraft of playerAircraftsList) {
         const {x, y} = aircraft.position;
-        const visionRange = aircraft.stats.range + 2; 
+        // In stealth mode, vision is greatly reduced
+        const visionRange = challengeId === 'stealth_saturday' ? 1 : aircraft.stats.range + 2; 
 
         for(let i = x - visionRange; i <= x + visionRange; i++) {
             for(let j = y - visionRange; j <= y + visionRange; j++) {

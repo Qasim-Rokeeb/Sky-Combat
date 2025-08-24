@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, Rocket, Trophy, Zap } from "lucide-react";
+import { Gamepad2, Rocket, Trophy, Zap, Calendar } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -34,6 +34,12 @@ export default function LandingPage() {
                 <Button size="lg" className="font-bold text-lg">
                   <Gamepad2 className="mr-2" />
                   Play Now
+                </Button>
+              </Link>
+               <Link href="/daily-challenge">
+                <Button size="lg" className="font-bold text-lg" variant="secondary">
+                  <Calendar className="mr-2" />
+                  Daily Challenge
                 </Button>
               </Link>
                <Link href="/achievements">

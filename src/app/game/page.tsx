@@ -33,6 +33,7 @@ import Scoreboard from "@/components/sky-combat/Scoreboard";
 import VictoryAnimation from "@/components/sky-combat/VictoryAnimation";
 import DefeatAnimation from "@/components/sky-combat/DefeatAnimation";
 import ActionLog from "@/components/sky-combat/ActionLog";
+import { useSearchParams } from "next/navigation";
 
 type GameAction =
   | { type: "SELECT_AIRCRAFT"; payload: { aircraftId: string } }
@@ -44,7 +45,7 @@ type GameAction =
   | { type: "END_TURN" }
   | { type: "START_OPPONENT_TURN" }
   | { type: "SET_GAME_OVER"; payload: { winner: Player | null } }
-  | { type: "RESET_GAME" }
+  | { type: "RESET_GAME"; payload: { challenge?: string | null } }
   | { type: "SHOW_ANIMATION"; payload: { type: 'attack' | 'heal' | 'levelUp', aircraftId: string, defenderId?: string, damage?: number, healAmount?: number, level?: number } }
   | { type: "CLEAR_ANIMATION" }
   | { type: "UPDATE_STATUS_EFFECTS" }
@@ -455,7 +456,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, phase: 'gameOver', winner: action.payload.winner, actionLog: [...state.actionLog, `Game Over! ${action.payload.winner} is victorious!`].slice(-5)};
 
     case "RESET_GAME":
-        return createInitialState(GRID_WIDTH, GRID_HEIGHT);
+        return createInitialState(GRID_WIDTH, GRID_HEIGHT, action.payload.challenge);
     
     case "SHOW_ANIMATION": {
         if (action.payload.type === 'attack') {
@@ -521,8 +522,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
   }
 };
 
-export default function SkyCombatPage() {
-  const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT));
+const GamePageContent = () => {
+  const searchParams = useSearchParams();
+  const challenge = searchParams.get('challenge');
+  const [state, dispatch] = useReducer(gameReducer, createInitialState(GRID_WIDTH, GRID_HEIGHT, challenge));
   const { toast } = useToast();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
@@ -675,7 +678,7 @@ export default function SkyCombatPage() {
 
   const handleResetGame = () => {
       setShowGameOverDialog(false);
-      dispatch({type: 'RESET_GAME'});
+      dispatch({type: 'RESET_GAME', payload: { challenge }});
   }
 
   // Game Over Check
@@ -797,4 +800,12 @@ export default function SkyCombatPage() {
       />
     </main>
   );
+}
+
+export default function SkyCombatPage() {
+    return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <GamePageContent />
+        </React.Suspense>
+    )
 }
