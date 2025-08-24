@@ -9,6 +9,7 @@ import { Bomb } from "lucide-react";
 
 interface BattlefieldProps {
   grid: Grid;
+  visibleGrid: boolean[][];
   onCellClick: (x: number, y: number, aircraft: Aircraft | null) => void;
   selectedAircraftId: string | null;
   actionHighlights: { x: number; y: number }[];
@@ -20,6 +21,7 @@ interface BattlefieldProps {
 
 const Battlefield: React.FC<BattlefieldProps> = ({
   grid,
+  visibleGrid,
   onCellClick,
   selectedAircraftId,
   actionHighlights,
@@ -80,12 +82,15 @@ const Battlefield: React.FC<BattlefieldProps> = ({
             const aircraftOnCell = grid[y][x];
             const isAttackable = aircraftOnCell ? attackableAircraftIds.includes(aircraftOnCell.id) : false;
             const isSupportable = aircraftOnCell ? supportableAircraftIds.includes(aircraftOnCell.id) : false;
+            const isVisible = visibleGrid[y][x];
 
             return (
               <div
                 key={`${x}-${y}`}
                 className={cn(
                   "border border-primary/10 flex items-center justify-center transition-all duration-300",
+                  "bg-background/20",
+                  isVisible && "bg-transparent",
                   isPlayerTurn && "cursor-pointer",
                   !isPlayerTurn && !cell && "cursor-not-allowed",
                   isHighlighted ? "bg-primary/30" : "hover:bg-accent/20"

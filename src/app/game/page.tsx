@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   Bomb,
   Crosshair,
@@ -518,6 +518,46 @@ export default function SkyCombatPage() {
   const handleVolumeChange = (newVolume: number[]) => {
     setVolume(newVolume[0]);
   };
+  
+  // This calculates which tiles are visible to the player
+  const visibleGrid = useMemo(() => {
+    const visible = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(false));
+    const playerAircrafts = Object.values(state.aircrafts).filter(a => a.owner === 'player');
+
+    if (state.currentPlayer === 'opponent') {
+        // During opponent's turn, everything is visible for simplicity
+        return Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(true));
+    }
+    
+    for(const aircraft of playerAircrafts) {
+        const {x, y} = aircraft.position;
+        const visionRange = aircraft.stats.range + 2; // Vision is slightly larger than attack range
+
+        for(let i = x - visionRange; i <= x + visionRange; i++) {
+            for(let j = y - visionRange; j <= y + visionRange; j++) {
+                if (i >= 0 && i < GRID_WIDTH && j >= 0 && j < GRID_HEIGHT) {
+                    if(Math.abs(x - i) + Math.abs(y - j) <= visionRange) {
+                        visible[j][i] = true;
+                    }
+                }
+            }
+        }
+    }
+    return visible;
+  }, [state.aircrafts, state.currentPlayer]);
+  
+  // This filters the grid to only show aircraft in visible cells
+  const playerVisibleGrid = useMemo(() => {
+    return state.grid.map((row, y) => {
+        return row.map((cell, x) => {
+            if (visibleGrid[y][x]) {
+                return cell;
+            }
+            return null;
+        });
+    });
+  }, [state.grid, visibleGrid]);
+
 
   useEffect(() => {
     if (musicAudioRef.current) {
@@ -690,7 +730,8 @@ export default function SkyCombatPage() {
       </aside>
       <div className="flex-grow flex items-center justify-center">
         <Battlefield
-          grid={state.grid}
+          grid={playerVisibleGrid}
+          visibleGrid={visibleGrid}
           onCellClick={handleCellClick}
           selectedAircraftId={state.selectedAircraftId}
           actionHighlights={state.actionHighlights}
