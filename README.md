@@ -9,7 +9,7 @@ Sky Combat is a web-based strategy game where players engage in turn-based aeria
 
 *   **Strategic Gameplay:** Plan your moves, anticipate your enemy, and utilize unique aircraft abilities to gain the upper hand on a grid-based battlefield.
 *   **Multiple Aircrafts:** Command a diverse fleet of fighters, bombers, and support aircraft, each with distinct stats and powerful special abilities.
-*   **AI Opponent:** Test your tactical skills against a challenging AI opponent. Plus, get strategic suggestions from an integrated AI assistant.
+
 
 # Style Guidelines
 
