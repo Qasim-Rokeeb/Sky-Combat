@@ -3,7 +3,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, Rocket, Trophy, Zap, Calendar, Shield } from "lucide-react";
+import { Gamepad2, Rocket, Trophy, Zap, Calendar, Shield, Star } from "lucide-react";
+
+const reviews = [
+  {
+    name: "Cmdr. Maverick",
+    rating: 5,
+    quote: "The tactical depth is incredible. Every match feels like a high-stakes aerial chess game. I can't get enough!",
+  },
+  {
+    name: "Sgt. Stryker",
+    rating: 5,
+    quote: "Finally, a strategy game that rewards smart thinking over quick reflexes. The AI is challenging, and the special abilities add so much variety.",
+  },
+  {
+    name: "Ace Pilot 'Ghost'",
+    rating: 4,
+    quote: "A fantastic turn-based combat game. The UI is clean, and the gameplay is addictive. My only wish is for more aircraft types in the future!",
+  },
+];
+
 
 export default function LandingPage() {
   return (
@@ -107,6 +126,44 @@ export default function LandingPage() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        <section className="container mx-auto px-4 py-16 sm:py-24">
+           <div className="text-center mb-12">
+             <h3 className="text-4xl font-bold font-headline">What Pilots Are Saying</h3>
+             <p className="text-muted-foreground mt-2">
+               Feedback from the front lines.
+             </p>
+           </div>
+           <div className="grid md:grid-cols-3 gap-8">
+             {reviews.map((review, index) => (
+               <Card key={index} className="bg-card/50 backdrop-blur-sm flex flex-col">
+                 <CardHeader>
+                   <div className="flex items-center gap-2">
+                     {Array.from({ length: 5 }).map((_, i) => (
+                       <Star
+                         key={i}
+                         className={
+                           i < review.rating
+                             ? "w-5 h-5 text-yellow-400"
+                             : "w-5 h-5 text-muted-foreground"
+                         }
+                         fill={
+                           i < review.rating ? "currentColor" : "none"
+                         }
+                       />
+                     ))}
+                   </div>
+                 </CardHeader>
+                 <CardContent className="flex-grow">
+                   <p className="text-muted-foreground italic">"{review.quote}"</p>
+                 </CardContent>
+                 <div className="p-6 pt-0">
+                    <p className="font-bold font-headline text-right">- {review.name}</p>
+                 </div>
+               </Card>
+             ))}
+           </div>
         </section>
 
         <section className="container mx-auto px-4 py-16 sm:py-24">
