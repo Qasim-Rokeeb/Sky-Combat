@@ -181,7 +181,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                     <Image 
-                        src="https://placehold.co/600x400.png"
+                        src="https://picsum.photos/600/400"
                         alt="Gameplay Screenshot"
                         width={600}
                         height={400}
