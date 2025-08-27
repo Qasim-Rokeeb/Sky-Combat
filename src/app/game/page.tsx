@@ -502,7 +502,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case "SHOW_ANIMATION": {
         if (action.payload.type === 'attack') {
-             return {...state, animation: {type: 'attack', attackerId: action.payload.aircraftId, defenderId: action.payload.defenderId!, damage: action.payload.damage}};
+             return {...state, animation: {type: 'attack', aircraftId: action.payload.aircraftId, defenderId: action.payload.defenderId!, damage: action.payload.damage}};
         }
         if (action.payload.type === 'heal') {
              return {...state, animation: {type: 'heal', attackerId: action.payload.aircraftId, defenderId: action.payload.defenderId!, healAmount: action.payload.healAmount}};
@@ -893,3 +893,5 @@ export default function SkyCombatPage() {
         </React.Suspense>
     )
 }
+
+    

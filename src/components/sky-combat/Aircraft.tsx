@@ -84,12 +84,12 @@ const Aircraft: React.FC<AircraftProps> = ({
               aircraft.statusEffects.includes('stunned') && "opacity-60",
               aircraft.stats.actionPoints === 0 && 'opacity-50',
               aircraft.statusEffects.includes('empowered') && "animate-empowered-glow",
-              isAnimating && animation?.type === 'levelUp' && 'animate-level-up',
+              animation?.type === 'levelUp' && animation.aircraftId === aircraft.id && 'animate-level-up',
             )}
             data-owner={aircraft.owner}
             onClick={handleWrapperClick}
           >
-             {isAnimating && animation?.type === 'levelUp' && (
+             {animation?.type === 'levelUp' && animation.aircraftId === aircraft.id && (
                 <div className="absolute -top-10 text-green-400 font-black text-xl animate-critical-popup flex items-center gap-1">
                     <ChevronsUp className="w-6 h-6" />
                     LEVEL UP! {animation.level}
@@ -212,3 +212,5 @@ const Aircraft: React.FC<AircraftProps> = ({
 };
 
 export default Aircraft;
+
+    

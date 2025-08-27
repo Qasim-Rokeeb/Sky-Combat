@@ -48,7 +48,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation 
           </div>
         </div>
       {aircraft ? (
-        <Card className={cn("bg-secondary/50 border-primary/20", isLevelingUp && "animate-level-up-glow")}>
+        <Card className={cn("bg-secondary/50 border-primary/20", animation?.type === 'levelUp' && animation.aircraftId === aircraft.id && "animate-level-up-glow")}>
           <CardHeader className="p-4">
             <CardTitle className="text-lg capitalize flex items-center justify-between font-headline">
               <div className="flex items-center gap-2">
@@ -120,3 +120,5 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation 
 };
 
 export default PlayerStats;
+
+    
