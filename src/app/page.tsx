@@ -145,7 +145,7 @@ export default function LandingPage() {
                          key={i}
                          className={
                            i < review.rating
-                             ? "w-5 h-5 text-yellow-400"
+                             ? "w-5 h-5 text-primary"
                              : "w-5 h-5 text-muted-foreground"
                          }
                          fill={
