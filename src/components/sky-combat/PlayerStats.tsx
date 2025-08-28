@@ -78,7 +78,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation 
                       <span>Energy</span>
                       <span>{aircraft.stats.energy} / {aircraft.stats.maxEnergy}</span>
                   </div>
-                  <Progress value={energyPercentage} className="h-2" indicatorClassName="bg-cyan-400"/>
+                  <Progress value={energyPercentage} className="h-2" indicatorClassName="bg-primary"/>
               </div>
               <div>
                   <div className="flex justify-between">
@@ -103,7 +103,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation 
                 <span>Dodge Chance:</span> 
                 <span>
                     {Math.round(displayDodge * 100)}% 
-                    {weather === 'Strong Winds' && <span className="text-green-400 text-xs"> (+15%)</span>}
+                    {weather === 'Strong Winds' && <span className="text-primary text-xs"> (+15%)</span>}
                 </span>
               </div>
           </CardContent>
@@ -120,5 +120,3 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ aircraft, weather, animation 
 };
 
 export default PlayerStats;
-
-    

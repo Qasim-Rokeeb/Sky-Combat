@@ -144,17 +144,17 @@ export default function AchievementsPage() {
                     <p className="text-6xl font-bold text-primary-foreground">{battlesPlayed}</p>
                 </CardContent>
             </Card>
-             <Card className="bg-green-500/20 backdrop-blur-sm border-green-500 shadow-lg shadow-green-500/20">
+             <Card className="bg-primary/20 backdrop-blur-sm border-primary shadow-lg shadow-primary/20">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <div className="p-3 rounded-full bg-green-500/10 text-green-500">
+                    <div className="p-3 rounded-full bg-primary/10 text-primary">
                         <Flame className="w-8 h-8" />
                     </div>
-                    <CardTitle className="font-headline text-green-400">
+                    <CardTitle className="font-headline text-primary-foreground">
                         Win Streak
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center">
-                    <p className="text-6xl font-bold text-green-400">{winStreak}</p>
+                    <p className="text-6xl font-bold text-primary-foreground">{winStreak}</p>
                 </CardContent>
             </Card>
             <Card className="bg-destructive/20 backdrop-blur-sm border-destructive shadow-lg shadow-destructive/20">
